@@ -1,0 +1,576 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Monitoring & Performance
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Real-time and historical performance metrics with slow-query analysis.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring & Performance · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl">Dashboard</span></a></div>
+  <div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl">MongoDB Servers</span></a></div>
+  <div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl">Operations</span></a></div>
+  <div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item active" href="monitoring.html"><span class="lbl">Monitoring & Performance</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">Monitoring</span><span class="current">Overview</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <div class="alert-bell-wrap" style="position:relative;">
+      <button class="icon-btn" id="btn-alert-bell" title="Alerts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="dot-alert"></span></button>
+      <div class="alert-dropdown" id="alert-dropdown">
+        <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+        <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+      </div>
+    </div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Monitoring &amp; Performance</h1>
+    <p class="page-sub">Health, resource metrics, and query performance across the estate</p>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- TIMEFRAME SELECTOR (IST)                   -->
+<!-- ========================================== -->
+<div class="card card-pad" style="margin-bottom: 24px; display: flex; align-items: center; gap: 16px; background: var(--bg-card); flex-wrap: wrap;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark);">Timeframe <span style="color: var(--green);">(IST)</span>:</label>
+  </div>
+  
+  <select id="timeframe-select" class="field-select" style="padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none; min-width: 180px;">
+    <option value="30s">Last 30 seconds</option>
+    <option value="1m">Last 1 minute</option>
+    <option value="5m">Last 5 minutes</option>
+    <option value="10m">Last 10 minutes</option>
+    <option value="30m">Last 30 minutes</option>
+    <option value="1h" selected>Last 1 hour</option>
+    <option value="8h">Last 8 hours</option>
+    <option value="24h">Last 24 hours</option>
+    <option value="2d">Last 2 days</option>
+    <option value="3d">Last 3 days</option>
+    <option value="1w">Last 1 week</option>
+    <option value="2w">Last 2 weeks</option>
+    <option value="3w">Last 3 weeks</option>
+    <option value="1M">Last 1 month</option>
+    <option value="custom">Custom Timeframe...</option>
+  </select>
+
+  <!-- Custom Timeframe Inputs -->
+  <div id="custom-time-container" style="display: none; align-items: center; gap: 12px;">
+    <input type="datetime-local" id="custom-start" class="field-select" style="padding: 7px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px;">
+    <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">TO</span>
+    <input type="datetime-local" id="custom-end" class="field-select" style="padding: 7px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px;">
+  </div>
+
+  <button class="btn btn-primary" onclick="loadAdvisorData()" style="padding: 8px 16px;">Apply Filters</button>
+</div>
+
+<div class="tabs" data-group="mon">
+  <div class="tab" data-target="mon-metrics" data-key="metrics">Metrics Dashboard</div>
+  <div class="tab active" data-target="mon-slow" data-key="slow-queries">Performance Advisor</div>
+</div>
+
+<!-- TAB: PERFORMANCE ADVISOR -->
+<div class="tab-panel active" data-group="mon" id="mon-slow">
+  
+  <div class="card card-pad" style="margin-bottom: 24px; display: flex; align-items: center; gap: 16px; background: var(--bg-card);">
+    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark);">Select Server for Advisor:</label>
+    <select id="advisor-server-select" class="field-select" style="min-width: 300px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 14px; outline: none;">
+      <option value="">Loading servers...</option>
+    </select>
+  </div>
+
+  <div id="advisor-content" style="display: none;">
+    <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--text-dark);">Optimize Performance</h2>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Analyzing top 10 slow queries and index usage statistics within the selected IST timeframe.</p>
+
+    <div class="stat-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adv-card" onclick="showAdvisorPanel('create-panel')" style="border-left: 4px solid #059669;">
+        <h3>Slow Queries &amp; Indexes <span class="adv-badge">Top 10</span></h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0;">Live data fetched from PostgreSQL</p>
+        <button class="btn" style="background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--text-dark);">View Queries</button>
+      </div>
+
+      <div class="adv-card" onclick="showAdvisorPanel('drop-panel')" style="border-left: 4px solid #d97706;">
+        <h3>Drop Indexes <span class="adv-badge" style="background: var(--red-bg); color: var(--red);">0</span></h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0;">Redundant Indexes detected</p>
+        <button class="btn" style="background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--text-dark);">View Recommendations</button>
+      </div>
+    </div>
+
+    <!-- CREATE INDEXES DETAILS PANEL (DYNAMICALLY POPULATED) -->
+    <div id="create-panel" class="adv-panel">
+      
+      <div class="banner banner-info" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center;">
+          <span style="color: var(--blue); margin-right: 12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/><path d="M14 4h6v6M10 14L20 4"/></svg></span>
+          <div style="font-size: 13px;">
+            <strong style="display: block; font-size: 14px; margin-bottom: 4px;">Need deeper query analysis?</strong>
+            For full historical query analytics, execution plans, and metrics beyond the Top 10, use PMM QAN.
+          </div>
+        </div>
+        <a href="https://your-pmm-server-url.com/graph/d/pmm-qan/pmm-query-analytics" target="_blank" class="btn btn-primary" style="padding: 8px 16px;">Launch PMM QAN</a>
+      </div>
+
+      <div class="section-head" style="margin-top:0;"><div><h2>Top 10 Slow Queries</h2></div></div>
+      
+      <!-- DYNAMIC CONTAINER -->
+      <div id="dynamic-slow-queries">
+         <div style="padding: 40px; text-align: center; color: var(--text-muted);">Please select a server to view data...</div>
+      </div>
+
+    </div>
+
+    <!-- DROP INDEXES DETAILS PANEL -->
+    <div id="drop-panel" class="adv-panel">
+      <div class="section-head" style="margin-top:0;"><div><h2>Redundant Indexes</h2></div></div>
+      <div class="card card-pad" style="text-align: center; color: var(--text-muted);">
+        No redundant indexes detected in this timeframe.
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="tab-panel" data-group="mon" id="mon-metrics">
+
+  <div class="banner banner-info" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+      <span style="color: var(--blue); margin-right: 12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/><path d="M14 4h6v6M10 14L20 4"/></svg></span>
+      <div style="font-size: 13px;">
+        <strong style="display: block; font-size: 14px; margin-bottom: 4px;">Need dashboards, graphs, or alerting rules?</strong>
+        Launch the full PMM dashboard for time-series graphs, per-node drill-down, and alert configuration.
+      </div>
+    </div>
+    <a id="launch-pmm-dashboard" href="https://your-pmm-server-url.com/graph/d/pmm-mongodb-overview" target="_blank" class="btn btn-primary" style="padding: 8px 16px; white-space: nowrap;">Launch PMM Dashboard</a>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;" id="metrics-stat-grid">
+    <div class="card card-pad"><div style="font-size:12px;color:var(--text-muted);font-weight:600;">TOTAL SERVERS</div><div id="m-total-servers" style="font-size:26px;font-weight:700;color:var(--text-dark);margin-top:6px;">&ndash;</div></div>
+    <div class="card card-pad"><div style="font-size:12px;color:var(--text-muted);font-weight:600;">OK</div><div id="m-status-ok" style="font-size:26px;font-weight:700;color:var(--green);margin-top:6px;">&ndash;</div></div>
+    <div class="card card-pad"><div style="font-size:12px;color:var(--text-muted);font-weight:600;">WARN</div><div id="m-status-warn" style="font-size:26px;font-weight:700;color:var(--amber);margin-top:6px;">&ndash;</div></div>
+    <div class="card card-pad"><div style="font-size:12px;color:var(--text-muted);font-weight:600;">CRITICAL</div><div id="m-status-critical" style="font-size:26px;font-weight:700;color:var(--red);margin-top:6px;">&ndash;</div></div>
+  </div>
+
+  <div class="section-head" style="margin-top:0;"><div><h2>Per-Server Health</h2></div></div>
+  <div id="metrics-server-table">
+    <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading metrics&hellip;</div>
+  </div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+
+<script>
+// --- TIMEFRAME SELECTOR LOGIC ---
+const timeframeSelect = document.getElementById('timeframe-select');
+const customTimeContainer = document.getElementById('custom-time-container');
+
+timeframeSelect.addEventListener('change', (e) => {
+  if (e.target.value === 'custom') {
+    customTimeContainer.style.display = 'flex';
+  } else {
+    customTimeContainer.style.display = 'none';
+  }
+});
+
+function toggleLog(index) {
+  const toggleBtn = document.getElementById('toggle-btn-' + index);
+  const logBlock = document.getElementById('log-block-' + index);
+  
+  toggleBtn.classList.toggle('on');
+  if (toggleBtn.classList.contains('on')) {
+    logBlock.style.display = 'block';
+  } else {
+    logBlock.style.display = 'none';
+  }
+}
+
+// --- METRICS DASHBOARD TAB ---
+let metricsLoaded = false;
+
+// Same helper as server-detail.html — DB Uptime is a live metric (pulled
+// fresh over SSH/Mongo), never stored, so it's formatted the same way here.
+function formatUptime(seconds) {
+  if (seconds === null || seconds === undefined) return null;
+  const hrs = seconds / 3600;
+  if (hrs < 48) return `${hrs.toFixed(1)} hrs`;
+  const days = Math.floor(hrs / 24);
+  const remHrs = Math.round(hrs % 24);
+  return `${days}d ${remHrs}h`;
+}
+
+function renderMetricsTable(servers) {
+  if (!servers.length) {
+    return '<div class="card card-pad" style="text-align: center; color: var(--text-muted);">No servers registered yet.</div>';
+  }
+  
+  let rows = servers.map(s => `
+    <tr>
+      <td style="padding:10px 12px;font-weight:600;">${s.hostname}</td>
+      <td style="padding:10px 12px;" class="mono">${s.ip_address || '&mdash;'}</td>
+      <td style="padding:10px 12px;" id="db-uptime-${s.id}">&hellip;</td>
+      <td style="padding:10px 12px;">${s.environment || '&mdash;'}</td>
+      <td style="padding:10px 12px;">${s.status}</td>
+      <td style="padding:10px 12px;" id="cpu-${s.id}">&hellip;</td>
+      <td style="padding:10px 12px;" id="mem-${s.id}">&hellip;</td>
+      <td style="padding:10px 12px;" class="mono" id="version-${s.id}">&hellip;</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="card card-pad">
+      <div class="table-responsive">
+      <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="text-align:left; border-bottom: 1px solid var(--border);">
+            <th style="padding:10px 12px;">Server</th>
+            <th style="padding:10px 12px;">IP Address</th>
+            <th style="padding:10px 12px;">DB Uptime</th>
+            <th style="padding:10px 12px;">Env</th>
+            <th style="padding:10px 12px;">Status</th>
+            <th style="padding:10px 12px;">CPU</th>
+            <th style="padding:10px 12px;">Memory</th>
+            <th style="padding:10px 12px;">DB Version</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>
+    </div>
+  `;
+}
+
+function loadLiveServerMetrics(servers) {
+  // Use forEach so they load in PARALLEL. One unreachable server won't block the rest.
+  servers.forEach(async (s) => {
+    const uptimeCell = document.getElementById(`db-uptime-${s.id}`);
+    const cpuCell = document.getElementById(`cpu-${s.id}`);
+    const memCell = document.getElementById(`mem-${s.id}`);
+    const verCell = document.getElementById(`version-${s.id}`);
+    
+    if (!uptimeCell) return;
+    
+    try {
+      const [inv, live] = await Promise.all([
+        Api.getServer(s.id).catch(() => ({})), 
+        Api.getLiveMetrics(s.id)
+      ]);
+      
+      // CPU
+      if (live.os && !live.os.error) {
+        const cores = inv.cpu_cores ? `(${inv.cpu_cores} cores)` : '';
+        cpuCell.innerHTML = live.os.cpu_pct !== null 
+          ? `${live.os.cpu_pct}% <span style="font-size:11px;color:var(--text-muted);">${cores}</span>` 
+          : '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+      } else {
+        cpuCell.innerHTML = `<span style="color:var(--text-muted);font-weight:600;font-size:12px;">${live.os && live.os.error ? 'SSH unreachable' : 'Unavailable'}</span>`;
+      }
+
+      // Memory
+      if (live.os && !live.os.error) {
+        const gb = inv.memory_gb ? `(${inv.memory_gb} GB)` : '';
+        memCell.innerHTML = live.os.memory_pct !== null 
+          ? `${live.os.memory_pct}% <span style="font-size:11px;color:var(--text-muted);">${gb}</span>` 
+          : '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+      } else {
+        memCell.innerHTML = `<span style="color:var(--text-muted);font-weight:600;font-size:12px;">${live.os && live.os.error ? 'SSH unreachable' : 'Unavailable'}</span>`;
+      }
+
+      // DB Uptime & Version
+      if (live.mongo && live.mongo.reachable) {
+        uptimeCell.innerHTML = formatUptime(live.mongo.uptime_seconds) || '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+        verCell.innerHTML = live.mongo.version || inv.mongo_version || s.mongo_version || '&mdash;';
+      } else {
+        uptimeCell.innerHTML = `<span style="color:var(--text-muted);font-weight:600;font-size:12px;">${live.mongo && live.mongo.error ? 'Mongo unreachable' : 'Unavailable'}</span>`;
+        verCell.innerHTML = inv.mongo_version || s.mongo_version || '&mdash;';
+      }
+      
+    } catch (err) {
+      uptimeCell.innerHTML = '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+      cpuCell.innerHTML = '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+      memCell.innerHTML = '<span style="color:var(--text-muted);font-weight:600;font-size:12px;">Unavailable</span>';
+      verCell.innerHTML = s.mongo_version || '&mdash;';
+    }
+  });
+}
+
+async function loadMetricsDashboard() {
+  const tableEl = document.getElementById('metrics-server-table');
+  try {
+    const data = await Api.getMonitoringDashboardStats();
+    document.getElementById('m-total-servers').textContent = data.total_servers;
+    document.getElementById('m-status-ok').textContent = data.health_status_counts.OK || 0;
+    document.getElementById('m-status-warn').textContent = data.health_status_counts.WARN || 0;
+    document.getElementById('m-status-critical').textContent = data.health_status_counts.CRITICAL || 0;
+    
+    tableEl.innerHTML = renderMetricsTable(data.servers);
+    loadLiveServerMetrics(data.servers);
+    
+    metricsLoaded = true;
+  } catch (err) {
+    console.error(err);
+    tableEl.innerHTML = '<div style="color: var(--red); padding: 20px; text-align: center;">Error loading metrics. Is the backend running?</div>';
+  }
+}
+
+document.querySelector('.tab[data-key="metrics"]').addEventListener('click', () => {
+  if (!metricsLoaded) loadMetricsDashboard();
+});
+if (new URLSearchParams(window.location.search).get('tab') === 'metrics') {
+  loadMetricsDashboard();
+}
+
+function showAdvisorPanel(panelId) {
+  document.querySelectorAll('.adv-panel').forEach(p => p.style.display = 'none');
+  document.getElementById(panelId).style.display = 'block';
+}
+
+// FETCH DATA FROM NEW API
+async function loadAdvisorData() {
+  const serverId = document.getElementById('advisor-server-select').value;
+  const timeframe = timeframeSelect.value;
+  
+  if (!serverId) return;
+  
+  const container = document.getElementById('dynamic-slow-queries');
+  container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading live data from PostgreSQL...</div>';
+  
+  try {
+    const data = await Api.getPerformanceAdvisor(serverId, timeframe);
+
+    if (data.status === 'success') {
+       
+       // Process DROP INDEX Recommendations
+       const dropRecs = data.recommendations.filter(r => r.rec_type === 'DROP');
+       document.querySelector('.adv-card:nth-child(2) .adv-badge').textContent = dropRecs.length;
+       
+       const dropPanel = document.getElementById('drop-panel');
+       let dropHtml = '<div class="section-head" style="margin-top:0;"><div><h2>Redundant Indexes</h2><p>An index that is a prefix of another compound index is redundant and can be removed.</p></div></div>';
+       
+       if (dropRecs.length === 0) {
+           dropHtml += '<div class="card card-pad" style="text-align: center; color: var(--text-muted);">No redundant indexes detected in this timeframe.</div>';
+       } else {
+           dropRecs.forEach(r => {
+               const keyStr = Object.keys(r.index_keys).map(k => `${k}: ${r.index_keys[k]}`).join('<br>');
+               dropHtml += `
+                 <div class="card card-pad" style="margin-bottom: 16px;">
+                   <div style="font-size: 13px; font-weight: 600; margin-bottom: 16px;">${r.namespace}</div>
+                   <div style="display: flex; gap: 24px; align-items: flex-start;">
+                     <div style="flex: 1;">
+                       <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Index Name: <span style="font-family: monospace; color: var(--text-dark);">${r.index_name}</span> <span style="background: var(--red-bg); color: var(--red); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">REDUNDANT</span></div>
+                       <div class="index-box">
+                         <span class="code-text">${keyStr}</span>
+                         <div style="margin-top: 12px; text-align: right;">
+                           <button class="btn" style="color: var(--red); border-color: var(--red); font-size: 12px; padding: 4px 12px;">DROP INDEX</button>
+                         </div>
+                       </div>
+                     </div>
+                     <div style="flex: 1; background: var(--bg-page); padding: 16px; border-radius: 8px; font-size: 12px; color: var(--text-muted); border: 1px dashed var(--border-strong);">
+                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; color: var(--amber);"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><br>
+                       ${r.reason}<br><br><strong>Impact:</strong> ${r.estimated_impact}
+                     </div>
+                   </div>
+                 </div>
+               `;
+           });
+       }
+       dropPanel.innerHTML = dropHtml;
+
+       if (data.slow_queries.length === 0) {
+           container.innerHTML = '<div class="card card-pad" style="text-align: center; color: var(--text-muted);">No slow queries found in this timeframe! 🎉</div>';
+           return;
+       }
+       
+       let html = '';
+       data.slow_queries.forEach((q, idx) => {
+         
+         // Extract Filter keys safely
+         let keysHtml = '<span class="code-text">No clear filter detected</span>';
+         let filterObj = {};
+         
+         if (q.query_shape && typeof q.query_shape === 'object') {
+             // Depending on mongod log format, filter is usually inside 'filter' or 'query'
+             filterObj = q.query_shape.filter || q.query_shape.query || q.query_shape;
+             
+             const keys = Object.keys(filterObj).filter(k => !k.startsWith('$'));
+             if (keys.length > 0) {
+                 keysHtml = keys.map(k => `<span class="code-text">${k}: 1</span>`).join('');
+             }
+         }
+         
+         const rawJsonString = JSON.stringify(q.query_shape, null, 2);
+
+         html += `
+          <div class="card card-pad" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 13px; font-weight: 600; color: var(--text-dark);">NAMESPACE: <span style="font-family: monospace; color: var(--text-muted); font-weight: normal;">${q.namespace}</span></span>
+              <span style="font-size: 11px; font-weight: bold; color: var(--amber); background: var(--amber-bg); padding: 4px 8px; border-radius: 4px;">#${idx + 1} SLOWEST</span>
+            </div>
+            
+            <div style="display: flex; gap: 24px;">
+              <div class="index-box" style="flex: 1; margin-top: 0;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">SUGGESTED INDEX KEYS</div>
+                ${keysHtml}
+                <div style="margin-top: 16px; text-align: right;">
+                  <button class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;">CREATE INDEX</button>
+                </div>
+              </div>
+              <div style="flex: 2; padding: 8px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px;">CURRENT QUERY METRICS (IST)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 13px;">
+                  <div>Avg. Execution Time<br><strong style="font-size: 15px; color: var(--text-dark);">${q.avg_duration_ms} ms</strong></div>
+                  <div>Executions / Hour<br><strong style="font-size: 15px; color: var(--text-dark);">${q.exec_per_hour}</strong></div>
+                  <div>Avg. Docs Scanned<br><strong style="font-size: 15px; color: var(--text-dark);">${q.avg_docs_scanned}</strong></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RAW JSON LOG TOGGLE -->
+            <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                <div id="toggle-btn-${idx}" class="toggle-switch" onclick="toggleLog(${idx})"></div>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-dark); cursor: pointer;" onclick="toggleLog(${idx})">
+                  View Query Shape JSON
+                </span>
+              </div>
+              <div id="log-block-${idx}" style="display: none; background: var(--grey-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+                 <div style="font-family: monospace; font-size: 12px; color: var(--text-primary); word-break: break-all; white-space: pre-wrap;">${rawJsonString}</div>
+              </div>
+            </div>
+
+          </div>
+         `;
+       });
+       
+       container.innerHTML = html;
+    }
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<div style="color: var(--red); padding: 20px; text-align: center;">Error loading data. Is the backend running?</div>';
+  }
+}
+
+// Server Select Initialization
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const data = await Api.listServers();
+    const servers = data.servers || [];
+    const advSelect = document.getElementById('advisor-server-select');
+    
+    if (servers.length > 0) {
+      advSelect.innerHTML = '<option value="">-- Select a Server --</option>' + 
+        servers.map(s => `<option value="${s.id}">${s.hostname} (${s.ip_address})</option>`).join('');
+    }
+
+    advSelect.addEventListener('change', function() {
+      const content = document.getElementById('advisor-content');
+      if (this.value) {
+        content.style.display = 'block';
+        loadAdvisorData(); // Auto-fetch when server is selected!
+      } else {
+        content.style.display = 'none';
+      }
+    });
+  } catch (err) {
+    console.error(err);
+  }
+});
+</script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
+
+

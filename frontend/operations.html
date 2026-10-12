@@ -1,0 +1,1310 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Operations
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Schedule and track DBA operations (backup, restart, config change, etc.).
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+<div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item active" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span><span class="nav-badge" id="nav-badge-operations" style="display:none;"></span></a><a class="nav-item" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="avatar">MU</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; Ahana / AngelOne</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">DB Operations</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">Operations</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <div class="alert-bell-wrap" style="position:relative;">
+      <button class="icon-btn" id="btn-alert-bell" title="Alerts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="dot-alert"></span></button>
+      <div class="alert-dropdown" id="alert-dropdown">
+        <div class="alert-dropdown-head">
+          <strong>Recent alerts</strong>
+          <a href="alerts.html" class="link" style="font-size:12px;">View all</a>
+        </div>
+        <div class="alert-dropdown-list" id="alert-dropdown-list">
+          <p class="cell-sub" style="padding:14px;">Loading&hellip;</p>
+        </div>
+      </div>
+    </div>
+    <div class="user-menu-wrap" style="position:relative;">
+      <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="user-dropdown-head">
+          <strong>Madan U</strong>
+          <span>DBA &middot; Ahana / AngelOne</span>
+        </div>
+        <button class="user-dropdown-item" id="btn-logout">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Operations</h1>
+    <p class="page-sub">Every infrastructure change, tracked from request to verification &middot; all times in IST</p>
+  </div>
+  <button class="btn btn-primary" id="btn-new-op">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    New operation
+  </button>
+</div>
+
+<div class="tabs" data-group="ops">
+  <div class="tab active" data-target="op-history" data-key="history">History</div>
+  <div class="tab" data-target="op-schedules" data-key="schedules">Scheduled</div>
+</div>
+
+<!-- ============================== HISTORY ============================== -->
+<div class="tab-panel active" data-group="ops" id="op-history">
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="flex gap-10" style="align-items:center;flex-wrap:wrap;">
+      <select id="f-history-range" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+        <optgroup label="Recent">
+          <option value="30s">Last 30 seconds</option>
+          <option value="1m">Last 1 minute</option>
+          <option value="5m">Last 5 minutes</option>
+          <option value="10m">Last 10 minutes</option>
+          <option value="30m">Last 30 minutes</option>
+        </optgroup>
+        <optgroup label="Hours">
+          <option value="1h">Last 1 hour</option>
+          <option value="8h">Last 8 hours</option>
+          <option value="12h">Last 12 hours</option>
+          <option value="24h" selected>Last 24 hours</option>
+        </optgroup>
+        <optgroup label="Days / weeks">
+          <option value="2d">Last 2 days</option>
+          <option value="3d">Last 3 days</option>
+          <option value="7d">Last 1 week</option>
+          <option value="14d">Last 2 weeks</option>
+          <option value="21d">Last 3 weeks</option>
+          <option value="30d">Last 1 month</option>
+        </optgroup>
+        <option value="all">All time</option>
+        <option value="custom">Custom range&hellip;</option>
+      </select>
+      <button class="btn btn-sm" id="btn-refresh-history">
+        <svg id="refresh-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3.5-7.14M21 4v5h-5"/></svg>
+        Refresh
+      </button>
+      <span class="cell-sub" id="history-updated-at" style="margin-left:auto;"></span>
+    </div>
+    <div class="custom-range-row" id="custom-range-row">
+      <div class="field" style="margin:0;">
+        <label>From (IST)</label>
+        <input type="datetime-local" id="f-range-from">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>To (IST)</label>
+        <input type="datetime-local" id="f-range-to">
+      </div>
+      <button class="btn btn-sm btn-primary" id="btn-apply-custom-range" style="margin-top:18px;">Apply</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>ID</th><th>Operation</th><th>Server</th><th>Requested by</th><th>Started (IST)</th><th>Completed (IST)</th><th>Duration</th><th>Status</th><th></th></tr></thead>
+        <tbody id="history-tbody">
+          <tr><td colspan="9" style="text-align:center;padding:28px;color:var(--text-muted);">Loading&hellip;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== SCHEDULED ============================== -->
+<div class="tab-panel" data-group="ops" id="op-schedules">
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="flex gap-10" style="align-items:center;">
+      <button class="btn btn-sm" id="btn-refresh-schedules">
+        <svg id="refresh-sched-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3.5-7.14M21 4v5h-5"/></svg>
+        Refresh
+      </button>
+      <span class="cell-sub" id="schedules-updated-at" style="margin-left:auto;"></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>ID</th><th>Operation</th><th>Server</th><th>Schedule (IST)</th><th>Last run (IST)</th><th>Next run (IST)</th><th>Status</th><th></th></tr></thead>
+        <tbody id="schedules-tbody">
+          <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-muted);">Loading&hellip;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== NEW OPERATION MODAL ============================== -->
+<div class="modal-overlay" id="m-new-op">
+  <div class="modal" style="width:560px;">
+    <div class="modal-head"><h3>New operation</h3><button class="icon-btn" onclick="closeModal('m-new-op')">&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Server</label>
+        <select id="f-server"></select>
+      </div>
+      <div class="field">
+        <label>Operation</label>
+        <select id="f-op-type"></select>
+      </div>
+      <div id="f-op-params"></div>
+
+      <div class="field"><label>When</label></div>
+      <label class="radio-card" id="card-when-now">
+        <input type="radio" name="f-when" value="now" checked>
+        <div><strong>Run now</strong><br><span>Execute immediately and watch live progress.</span></div>
+      </label>
+      <label class="radio-card" id="card-when-once">
+        <input type="radio" name="f-when" value="one_time">
+        <div><strong>Schedule once</strong><br><span>Run a single time at a future date/time (IST).</span></div>
+      </label>
+      <label class="radio-card" id="card-when-recurring">
+        <input type="radio" name="f-when" value="recurring">
+        <div><strong>Recurring</strong><br><span>Repeat every day, or on a chosen weekday, at a fixed IST time.</span></div>
+      </label>
+      <label class="radio-card" id="card-when-interval">
+        <input type="radio" name="f-when" value="interval">
+        <div><strong>Interval</strong><br><span>Repeat continuously every N minutes or hours — no fixed clock time.</span></div>
+      </label>
+
+      <div id="f-when-onetime" style="display:none;">
+        <div class="flex gap-10">
+          <div class="field" style="flex:1;">
+            <label>Date</label>
+            <input type="date" id="f-run-at-date">
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Time</label>
+            <input type="time" id="f-run-at-time">
+          </div>
+        </div>
+        <p class="ist-note">Timezone: <strong>IST (Asia/Kolkata)</strong></p>
+      </div>
+      <div id="f-when-recurring" style="display:none;">
+        <div class="field">
+          <label>Day of week</label>
+          <select id="f-day-of-week">
+            <option value="">Every day</option>
+            <option value="0">Monday</option><option value="1">Tuesday</option>
+            <option value="2">Wednesday</option><option value="3">Thursday</option>
+            <option value="4">Friday</option><option value="5">Saturday</option>
+            <option value="6">Sunday</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="f-time-of-day">
+        </div>
+        <p class="ist-note">Timezone: <strong>IST (Asia/Kolkata)</strong></p>
+      </div>
+
+      <div id="f-when-interval" style="display:none;">
+        <div class="flex gap-10">
+          <div class="field" style="flex:1;">
+            <label>Every</label>
+            <input type="number" id="f-interval-value" min="1" step="1" value="5">
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Unit</label>
+            <select id="f-interval-unit">
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Starts at (optional)</label>
+          <div class="flex gap-10">
+            <input type="date" id="f-interval-start-date" style="flex:1;">
+            <input type="time" id="f-interval-start-time" style="flex:1;">
+          </div>
+        </div>
+        <p class="ist-note">If a start time is set, fires then, and repeatedly thereafter.</p>
+      </div>
+
+      <p class="hint" id="f-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-new-op')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-op">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== EDIT SCHEDULE MODAL ============================== -->
+<div class="modal-overlay" id="m-edit-schedule">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Edit scheduled operation</h3><button class="icon-btn" onclick="closeModal('m-edit-schedule')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" id="edit-sched-summary" style="margin-bottom:14px;"></p>
+      <div class="field" id="edit-op-type-field">
+        <label>Operation</label>
+        <select id="e-op-type">
+          <option value="start">Start MongoDB</option>
+          <option value="stop">Stop MongoDB</option>
+          <option value="restart">Restart MongoDB</option>
+        </select>
+        <p class="hint" style="margin-top:4px;">Only start/stop/restart can be swapped here. For other operation types, cancel this schedule and create a new one.</p>
+      </div>
+      <div class="field" id="edit-onetime-field">
+        <label>Run at</label>
+        <div class="flex gap-10">
+          <input type="date" id="e-run-at-date" style="flex:1;">
+          <input type="time" id="e-run-at-time" style="flex:1;">
+        </div>
+      </div>
+      <div id="edit-recurring-field">
+        <div class="field">
+          <label>Day of week</label>
+          <select id="e-day-of-week">
+            <option value="">Every day</option>
+            <option value="0">Monday</option><option value="1">Tuesday</option>
+            <option value="2">Wednesday</option><option value="3">Thursday</option>
+            <option value="4">Friday</option><option value="5">Saturday</option>
+            <option value="6">Sunday</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="e-time-of-day">
+        </div>
+      </div>
+      <div id="edit-interval-field" style="display:none;">
+        <div class="flex gap-10">
+          <div class="field" style="flex:1;">
+            <label>Every</label>
+            <input type="number" id="e-interval-value" min="1" step="1">
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Unit</label>
+            <select id="e-interval-unit">
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Starts at (optional)</label>
+          <div class="flex gap-10">
+            <input type="date" id="e-interval-start-date" style="flex:1;">
+            <input type="time" id="e-interval-start-time" style="flex:1;">
+          </div>
+        </div>
+      </div>
+      <p class="ist-note">Timezone: <strong>IST (Asia/Kolkata)</strong></p>
+      <div class="field" style="margin-top:14px;">
+        <label>Reason for change <span style="color:var(--red);">*</span></label>
+        <textarea id="e-change-reason" rows="2" placeholder="e.g. Moved restart window per change request CR-1123" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+      </div>
+      <label class="radio-card" style="margin-top:14px;">
+        <input type="checkbox" id="e-is-active">
+        <div><strong>Enabled</strong><br><span>Uncheck to disable without deleting.</span></div>
+      </label>
+      <p class="hint" id="e-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-edit-schedule')">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-schedule">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== FORCE / CANCEL CONFIRMATION ============================== -->
+<div class="modal-overlay" id="m-confirm-risky">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Confirm operation</h3><button class="icon-btn" onclick="closeModal('m-confirm-risky')">&times;</button></div>
+    <div class="modal-body">
+      <div class="banner banner-amber">
+        <span>&#9888;&#65039;</span>
+        <div><strong>Long-running operations detected</strong>
+          This may terminate in-flight work on the server. Review before proceeding.</div>
+      </div>
+      <div class="checklist">
+        <div class="check-row fail"><span class="ico">&#9888;</span><span class="label" id="risk-count"></span></div>
+        <div class="check-row fail"><span class="ico">&#8987;</span><span class="label" id="risk-longest"></span></div>
+        <div class="check-row pending"><span class="ico">&#8942;</span><span class="label" id="risk-threshold"></span></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-confirm-risky')">Cancel operation</button>
+      <button class="btn btn-danger" id="btn-force-op">Force restart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== LIVE OPERATION PANEL ============================== -->
+<div class="modal-overlay" id="m-live-op">
+  <div class="modal" style="width:600px;">
+    <div class="modal-head">
+      <h3 id="live-title">Operation</h3>
+      <button class="icon-btn" onclick="closeLiveOp()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="flex" style="justify-content:space-between;margin-bottom:10px;">
+        <span class="badge badge-grey" id="live-status-badge"><span class="dot"></span>Requested</span>
+        <span class="elapsed-pill" id="live-elapsed"></span>
+      </div>
+      <div class="meter" style="width:100%;height:8px;margin-bottom:18px;"><span id="live-meter-fill" style="width:0%;"></span></div>
+
+      <div class="stepper" id="live-steps"></div>
+
+      <div id="live-result-banner"></div>
+
+      <p class="section-head" style="margin:18px 0 8px;font-size:12.5px;font-weight:700;color:var(--text-secondary);">LIVE LOGS</p>
+      <div class="log-terminal" id="live-log-terminal">Waiting for first log line&hellip;</div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeLiveOp()">Close</button></div>
+  </div>
+</div>
+
+<!-- ============================== PAST OPERATION DETAIL (read-only) ============================== -->
+<div class="modal-overlay" id="m-log">
+  <div class="modal" style="width:600px;">
+    <div class="modal-head"><h3 id="log-title">Operation detail</h3><button class="icon-btn" onclick="closeModal('m-log')">&times;</button></div>
+    <div class="modal-body">
+      <div id="log-params"></div>
+      <div class="stepper" id="log-steps"></div>
+      <p class="section-head" style="margin:18px 0 8px;font-size:12.5px;font-weight:700;color:var(--text-secondary);">LOGS</p>
+      <div class="log-terminal" id="log-terminal">Loading&hellip;</div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('m-log')">Close</button></div>
+  </div>
+</div>
+
+<!-- ============================== FULL OPERATION DETAIL (history row click) ============================== -->
+<div class="modal-overlay" id="m-operation-detail">
+  <div class="modal" style="width:520px;">
+    <div class="modal-head"><h3 id="od-title">Operation detail</h3><button class="icon-btn" onclick="closeModal('m-operation-detail')">&times;</button></div>
+    <div class="modal-body">
+      <div id="od-body"><p class="cell-sub">Loading&hellip;</p></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-operation-detail')">Close</button>
+      <button class="btn btn-primary" id="btn-od-view-log">View steps &amp; logs</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== SCHEDULE DETAIL / HISTORY ============================== -->
+<div class="modal-overlay" id="m-schedule-detail">
+  <div class="modal" style="width:540px;">
+    <div class="modal-head"><h3 id="sd-title">Schedule detail</h3><button class="icon-btn" onclick="closeModal('m-schedule-detail')">&times;</button></div>
+    <div class="modal-body">
+      <div id="sd-summary" style="margin-bottom:16px;"></div>
+      <p class="section-head" style="margin:0 0 8px;font-size:12.5px;font-weight:700;color:var(--text-secondary);">CHANGE HISTORY</p>
+      <div id="sd-history"><p class="cell-sub">Loading&hellip;</p></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-schedule-detail')">Close</button>
+      <button class="btn btn-primary" id="btn-sd-edit">Edit this schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== SUPPORT / RAISE ISSUE ============================== -->
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="s-username" placeholder="e.g. Madan U">
+      </div>
+      <div class="field">
+        <label>Your email</label>
+        <input type="email" id="s-email" placeholder="support@atlascontrol.io">
+      </div>
+      <div class="field">
+        <label>Issue</label>
+        <textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+      </div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// IST formatting — every timestamp the API returns is UTC; this is the one
+// place conversion happens. India has no DST so Intl's Asia/Kolkata handling
+// is reliable for both past and future instants.
+// ---------------------------------------------------------------------------
+function toIST(iso, { seconds = false } = {}) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const opts = { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric",
+                 hour: "2-digit", minute: "2-digit", hour12: true };
+  if (seconds) opts.second = "2-digit";
+  return d.toLocaleString("en-IN", opts).replace(",", "") + " IST";
+}
+function istInputToIsoWithOffset(dateStr, timeStr) {
+  // dateStr "YYYY-MM-DD", timeStr "HH:MM" — both entered by the user AS IST.
+  // Building the ISO string with an explicit +05:30 offset means the backend
+  // never has to guess the browser's timezone.
+  return `${dateStr}T${timeStr}:00+05:30`;
+}
+function formatDuration(startIso, endIso) {
+  if (!startIso) return "—";
+  const end = endIso ? new Date(endIso) : new Date();
+  const secs = Math.max(0, Math.round((end - new Date(startIso)) / 1000));
+  return `${Math.floor(secs / 60)}m ${secs % 60}s`;
+}
+
+// ---------------------------------------------------------------------------
+// Operation catalogue — labels, icons, and per-type param fields. Kept in
+// sync with backend/services/operations_service.py's OPERATION_TYPES + handlers.
+// ---------------------------------------------------------------------------
+const OP_ICONS = {
+  start: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+  stop: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>',
+  restart: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3.5-7.14M21 4v5h-5"/></svg>',
+  create_user: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+  backup: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/></svg>',
+  configure_profiler: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+  configure_auth: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  configure_memory: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>',
+  configure_journal: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+  change_port: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v3M3 16v3a2 2 0 002 2h14a2 2 0 002-2v-3M6 12h12"/></svg>',
+};
+const OP_LABELS = {
+  start: "Start MongoDB", stop: "Stop MongoDB (shutdown)", restart: "Restart MongoDB",
+  create_user: "Create user", backup: "Backup (db / collection)",
+  configure_profiler: "Configure profiler", configure_auth: "Configure authentication",
+  configure_memory: "Configure memory (WiredTiger cache)", configure_journal: "Configure journal",
+  change_port: "Change port",
+};
+const OP_FIELDS = {
+  start: [], stop: [], restart: [],
+  create_user: [
+    { key: "target_db", label: "Database", type: "text", required: true },
+    { key: "username", label: "Username", type: "text", required: true },
+    { key: "password", label: "Password", type: "password", required: true },
+    { key: "roles", label: "Roles (comma-separated)", type: "text", required: true, placeholder: "readWrite, dbAdmin" },
+  ],
+  backup: [
+    { key: "scope", label: "Backup scope", type: "select", options: ["db", "collection"], required: true },
+    { key: "db_name", label: "Database", type: "text", required: true },
+    { key: "collection_name", label: "Collection (collection-level only)", type: "text" },
+    { key: "compression", label: "Compression", type: "select", options: ["none", "gzip"], required: true },
+  ],
+  configure_profiler: [
+    { key: "target_db", label: "Database", type: "text", required: true },
+    { key: "enabled", label: "Enable profiler", type: "select", options: ["yes", "no"], required: true },
+    { key: "threshold_ms", label: "Slow-op threshold (ms)", type: "number", placeholder: "100" },
+  ],
+  configure_auth: [
+    { key: "enabled", label: "Enable authentication", type: "select", options: ["yes", "no"], required: true },
+  ],
+  configure_memory: [
+    { key: "cache_size_gb", label: "WiredTiger cache size (GB)", type: "number", required: true, step: "0.1" },
+  ],
+  configure_journal: [
+    { key: "enabled", label: "Enable journal", type: "select", options: ["yes", "no"], required: true },
+  ],
+  change_port: [
+    { key: "new_port", label: "New port", type: "number", required: true },
+  ],
+};
+
+let ALL_SERVERS = [];
+let PENDING_RUN = null;     // { opType, serverId, params } awaiting force/cancel decision
+let LIVE_POLL_TIMER = null;
+let LIVE_ELAPSED_TIMER = null;
+let HISTORY_AUTOREFRESH_TIMER = null;
+
+// ---------------------------------------------------------------------------
+// New-operation modal
+// ---------------------------------------------------------------------------
+function renderParamFields(opType) {
+  const wrap = document.getElementById("f-op-params");
+  wrap.innerHTML = "";
+  (OP_FIELDS[opType] || []).forEach(f => {
+    const field = document.createElement("div");
+    field.className = "field";
+    const label = document.createElement("label");
+    label.textContent = f.label;
+    field.appendChild(label);
+    let input;
+    if (f.type === "select") {
+      input = document.createElement("select");
+      f.options.forEach(o => {
+        const opt = document.createElement("option");
+        opt.value = o; opt.textContent = o;
+        input.appendChild(opt);
+      });
+    } else {
+      input = document.createElement("input");
+      input.type = f.type;
+      if (f.placeholder) input.placeholder = f.placeholder;
+      if (f.step) input.step = f.step;
+    }
+    input.id = `f-param-${f.key}`;
+    input.dataset.key = f.key;
+    input.dataset.required = f.required ? "1" : "";
+    field.appendChild(input);
+    wrap.appendChild(field);
+  });
+}
+
+function collectParams(opType) {
+  const params = {};
+  for (const f of (OP_FIELDS[opType] || [])) {
+    const el = document.getElementById(`f-param-${f.key}`);
+    let val = el.value;
+    if (f.required && !val) throw new Error(`${f.label} is required`);
+    if (!val) continue;
+    if (f.key === "roles") val = val.split(",").map(r => r.trim()).filter(Boolean);
+    else if (f.key === "enabled") val = (val === "yes");
+    else if (f.type === "number") val = Number(val);
+    params[f.key] = val;
+  }
+  return params;
+}
+
+async function openNewOpModal() {
+  const serverSel = document.getElementById("f-server");
+  const opSel = document.getElementById("f-op-type");
+  if (!ALL_SERVERS.length) {
+    try { ALL_SERVERS = (await Api.listServers()).servers; } catch (_e) { /* empty select below */ }
+  }
+  serverSel.innerHTML = ALL_SERVERS.map(s => `<option value="${s.id}">${s.hostname} (${s.ip_address})</option>`).join("")
+    || `<option value="">No servers registered</option>`;
+  opSel.innerHTML = Object.entries(OP_LABELS).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+  renderParamFields(opSel.value);
+  document.querySelector('input[name="f-when"][value="now"]').checked = true;
+  document.getElementById("f-when-onetime").style.display = "none";
+  document.getElementById("f-when-recurring").style.display = "none";
+  document.getElementById("f-when-interval").style.display = "none";
+  document.getElementById("f-interval-start-date").value = "";
+  document.getElementById("f-interval-start-time").value = "";
+  document.getElementById("f-error").style.display = "none";
+  openModal("m-new-op");
+}
+
+document.getElementById("btn-new-op").addEventListener("click", openNewOpModal);
+document.getElementById("f-op-type").addEventListener("change", (e) => renderParamFields(e.target.value));
+document.querySelectorAll('input[name="f-when"]').forEach(radio => {
+  radio.addEventListener("change", (e) => {
+    document.getElementById("f-when-onetime").style.display = e.target.value === "one_time" ? "" : "none";
+    document.getElementById("f-when-recurring").style.display = e.target.value === "recurring" ? "" : "none";
+    document.getElementById("f-when-interval").style.display = e.target.value === "interval" ? "" : "none";
+  });
+});
+
+async function submitRun(opType, serverId, params, force) {
+  try {
+    const op = await Api.runOperation(opType, serverId, params, force);
+    closeModal("m-new-op");
+    openLiveOp(op.id);
+    loadHistory();
+  } catch (err) {
+    if (err.status === 409 && err.data && err.data.requires_confirmation) {
+      PENDING_RUN = { opType, serverId, params };
+      const w = err.data.warning;
+      document.getElementById("risk-count").textContent = `${w.count} operation(s) have been running for more than ${w.threshold_minutes} minutes`;
+      document.getElementById("risk-longest").textContent = `Longest running: ${w.longest_minutes} minutes`;
+      document.getElementById("risk-threshold").textContent = `Configured threshold: ${w.threshold_minutes} minutes (admin-configurable)`;
+      document.getElementById("btn-force-op").textContent = opType === "stop" ? "Force stop" : "Force restart";
+      closeModal("m-new-op");
+      openModal("m-confirm-risky");
+    } else {
+      const errorEl = document.getElementById("f-error");
+      errorEl.textContent = err.message;
+      errorEl.style.display = "";
+    }
+  }
+}
+
+document.getElementById("btn-force-op").addEventListener("click", async () => {
+  if (!PENDING_RUN) return;
+  closeModal("m-confirm-risky");
+  await submitRun(PENDING_RUN.opType, PENDING_RUN.serverId, PENDING_RUN.params, true);
+  PENDING_RUN = null;
+});
+
+document.getElementById("btn-submit-op").addEventListener("click", async () => {
+  const errorEl = document.getElementById("f-error");
+  errorEl.style.display = "none";
+  const serverId = document.getElementById("f-server").value;
+  const opType = document.getElementById("f-op-type").value;
+  const when = document.querySelector('input[name="f-when"]:checked').value;
+  if (!serverId) { errorEl.textContent = "Select a server."; errorEl.style.display = ""; return; }
+
+  let params;
+  try {
+    params = collectParams(opType);
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = "";
+    return;
+  }
+
+  const btn = document.getElementById("btn-submit-op");
+  btn.disabled = true;
+  try {
+    if (when === "now") {
+      await submitRun(opType, Number(serverId), params, false);
+    } else if (when === "one_time") {
+      const date = document.getElementById("f-run-at-date").value;
+      const time = document.getElementById("f-run-at-time").value;
+      if (!date || !time) throw new Error("Pick a date and time.");
+      await Api.createSchedule({
+        operation_type: opType, server_id: Number(serverId), params, schedule_type: "ONE_TIME",
+        run_at: istInputToIsoWithOffset(date, time),
+      });
+      showToast("Scheduled");
+      closeModal("m-new-op");
+      loadSchedules();
+    } else if (when === "recurring") {
+      const timeVal = document.getElementById("f-time-of-day").value;
+      if (!timeVal) throw new Error("Pick a time.");
+      const dow = document.getElementById("f-day-of-week").value;
+      await Api.createSchedule({
+        operation_type: opType, server_id: Number(serverId), params, schedule_type: "RECURRING",
+        time_of_day: timeVal, day_of_week: dow === "" ? null : Number(dow),
+      });
+      showToast("Recurring schedule created");
+      closeModal("m-new-op");
+      loadSchedules();
+    } else {
+      const value = Number(document.getElementById("f-interval-value").value);
+      const unit = document.getElementById("f-interval-unit").value;
+      if (!value || value < 1) throw new Error("Enter an interval of at least 1.");
+      const interval_minutes = unit === "hours" ? value * 60 : value;
+      const sDate = document.getElementById("f-interval-start-date").value;
+      const sTime = document.getElementById("f-interval-start-time").value;
+      let run_at = null;
+      if (sDate && sTime) run_at = istInputToIsoWithOffset(sDate, sTime);
+      else if (sDate || sTime) throw new Error("Pick both date and time for the starting point, or leave both blank.");
+
+      await Api.createSchedule({
+        operation_type: opType, server_id: Number(serverId), params, schedule_type: "INTERVAL",
+        interval_minutes, run_at
+      });
+      showToast(`Repeating every ${value} ${unit}`);
+      closeModal("m-new-op");
+      loadSchedules();
+    }
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = "";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Live operation panel — polls the real Operation row until it finishes.
+// ---------------------------------------------------------------------------
+function stepRowClass(status) {
+  if (status === "OK") return "done";
+  if (status === "WARN") return "warn";
+  if (status === "FAILED") return "fail";
+  if (status === "RUNNING") return "active";
+  return "";
+}
+function stepDot(status) {
+  if (status === "OK") return "&#10003;";
+  if (status === "WARN") return "!";
+  if (status === "FAILED") return "&times;";
+  if (status === "RUNNING") return "&#8226;";
+  return "";
+}
+function renderSteps(containerId, steps) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = (steps || []).map(s => `
+    <div class="step ${stepRowClass(s.status)}">
+      <div class="step-line"></div>
+      <div class="step-dot">${stepDot(s.status)}</div>
+      <div class="step-body">
+        <div class="step-title">${s.label}${s.duration_ms != null ? `<span class="step-duration">${(s.duration_ms/1000).toFixed(1)}s</span>` : ""}</div>
+        ${s.message ? `<div class="step-desc">${s.message}</div>` : ""}
+      </div>
+    </div>`).join("");
+}
+function renderLogTerminal(containerId, logs) {
+  const el = document.getElementById(containerId);
+  if (!logs || !logs.length) { el.textContent = "No log lines yet."; return; }
+  el.innerHTML = logs.map(l =>
+    `<div class="lvl-${l.level}">[${toIST(l.ts, { seconds: true })}] ${l.message}</div>`
+  ).join("");
+  el.scrollTop = el.scrollHeight;
+}
+
+function statusBadgeHtml(status) {
+  const map = {
+    SUCCESS: '<span class="badge badge-green"><span class="dot"></span>Success</span>',
+    FAILED: '<span class="badge badge-red"><span class="dot"></span>Failed</span>',
+    RUNNING: '<span class="badge badge-amber"><span class="dot"></span>Running</span>',
+    REQUESTED: '<span class="badge badge-grey"><span class="dot"></span>Requested</span>',
+  };
+  return map[status] || `<span class="badge badge-grey"><span class="dot"></span>${status || "Unknown"}</span>`;
+}
+
+function stopLivePolling() {
+  if (LIVE_POLL_TIMER) { clearTimeout(LIVE_POLL_TIMER); LIVE_POLL_TIMER = null; }
+  if (LIVE_ELAPSED_TIMER) { clearInterval(LIVE_ELAPSED_TIMER); LIVE_ELAPSED_TIMER = null; }
+}
+function closeLiveOp() {
+  stopLivePolling();
+  closeModal("m-live-op");
+}
+
+async function openLiveOp(operationId) {
+  openModal("m-live-op");
+  document.getElementById("live-result-banner").innerHTML = "";
+  document.getElementById("live-log-terminal").textContent = "Waiting for first log line…";
+  stopLivePolling();
+
+  async function tick() {
+    let op;
+    try {
+      op = await Api.getOperation(operationId);
+    } catch (err) {
+      document.getElementById("live-log-terminal").textContent = `Failed to load: ${err.message}`;
+      return;
+    }
+    document.getElementById("live-title").textContent = `${OP_LABELS[op.operation_type] || op.operation_type} · ${op.hostname}`;
+    const badgeEl = document.getElementById("live-status-badge");
+    if (badgeEl) {
+      const wrap = document.createElement("div");
+      wrap.innerHTML = statusBadgeHtml(op.status);
+      const freshBadge = wrap.firstElementChild;
+      freshBadge.id = "live-status-badge";
+      badgeEl.replaceWith(freshBadge);
+    }
+    document.getElementById("live-elapsed").textContent = op.started_at ? formatDuration(op.started_at, op.completed_at) : "";
+    document.getElementById("live-meter-fill").style.width = `${op.progress_pct || 0}%`;
+    renderSteps("live-steps", op.steps);
+    renderLogTerminal("live-log-terminal", op.logs);
+
+    if (op.status === "SUCCESS" || op.status === "FAILED") {
+      stopLivePolling();
+      const banner = op.status === "SUCCESS"
+        ? `<div class="banner banner-green"><span>&#10003;</span><div><strong>Operation completed successfully</strong>Duration: ${formatDuration(op.started_at, op.completed_at)}</div></div>`
+        : `<div class="banner banner-red"><span>&#10071;</span><div><strong>Operation failed</strong>${op.error_message || "See logs below for details."}</div></div>`;
+      document.getElementById("live-result-banner").innerHTML = banner;
+      loadHistory();
+      return;
+    }
+    LIVE_POLL_TIMER = setTimeout(tick, 1500);
+  }
+  tick();
+}
+
+// ---------------------------------------------------------------------------
+// Read-only detail view for a past (finished) operation
+// ---------------------------------------------------------------------------
+async function viewLog(operationId) {
+  openModal("m-log");
+  document.getElementById("log-title").textContent = "Operation detail";
+  document.getElementById("log-steps").innerHTML = "";
+  document.getElementById("log-terminal").textContent = "Loading…";
+  try {
+    const op = await Api.getOperation(operationId);
+    document.getElementById("log-title").textContent = `${OP_LABELS[op.operation_type] || op.operation_type} · ${op.hostname}`;
+    const paramEntries = Object.entries(op.params || {}).filter(([k, v]) => k !== "password" && v !== null && v !== undefined && v !== "");
+    document.getElementById("log-params").innerHTML = paramEntries.length ? `
+      <p class="detail-section-label">Parameters</p>
+      <div class="detail-params" style="margin-bottom:18px;">
+        ${paramEntries.map(([k, v]) => `<div class="detail-param-row"><span class="k">${PARAM_LABELS[k] || k}</span><span class="v">${formatParamValue(v)}</span></div>`).join("")}
+      </div>` : "";
+    renderSteps("log-steps", op.steps);
+    renderLogTerminal("log-terminal", op.logs);
+  } catch (err) {
+    document.getElementById("log-terminal").textContent = `Failed to load: ${err.message}`;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Full operation detail popup — server, operation type, every param that was
+// submitted with it (db/collection for backups, roles for create_user, etc),
+// timestamps, and status. Separate from viewLog(), which is steps + logs only.
+// ---------------------------------------------------------------------------
+function formatParamValue(v) {
+  if (Array.isArray(v)) return v.join(", ");
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  if (v === null || v === undefined || v === "") return "—";
+  return String(v);
+}
+const PARAM_LABELS = {
+  target_db: "Database", username: "Username", roles: "Roles", scope: "Backup scope",
+  db_name: "Database", collection_name: "Collection", compression: "Compression",
+  enabled: "Enabled", threshold_ms: "Slow-op threshold (ms)", cache_size_gb: "Cache size (GB)",
+  new_port: "New port", password: "Password (hidden)",
+  day_of_week: "Day of week", time_of_day: "Time of day", interval_minutes: "Interval (min)",
+  run_at: "Run at",
+};
+async function openOperationDetail(operationId) {
+  openModal("m-operation-detail");
+  document.getElementById("od-title").textContent = "Operation detail";
+  document.getElementById("od-body").innerHTML = `<p class="cell-sub">Loading&hellip;</p>`;
+  try {
+    const op = await Api.getOperation(operationId);
+    const shortId = String(op.id).length > 12 ? String(op.id).slice(0, 8) + "…" : op.id;
+    document.getElementById("od-title").textContent = `${OP_LABELS[op.operation_type] || op.operation_type} · #${shortId}`;
+    document.getElementById("od-title").title = op.id;
+    const paramEntries = Object.entries(op.params || {}).filter(([, v]) => v !== null && v !== undefined && v !== "");
+    document.getElementById("od-body").innerHTML = `
+      <div class="detail-head">
+        <span class="op-icon">${OP_ICONS[op.operation_type] || ""}</span>
+        <div>
+          <h4>${OP_LABELS[op.operation_type] || op.operation_type}</h4>
+          <span class="mono-id">${op.id}</span>
+        </div>
+      </div>
+      <dl class="detail-grid">
+        <dt>Server</dt><dd>${op.hostname || "—"}</dd>
+        <dt>Requested by</dt><dd>${op.requested_by_username || "—"}</dd>
+        <dt>Started</dt><dd>${toIST(op.started_at)}</dd>
+        <dt>Completed</dt><dd>${toIST(op.completed_at)}</dd>
+        <dt>Duration</dt><dd>${op.started_at ? formatDuration(op.started_at, op.completed_at) : "—"}</dd>
+        <dt>Status</dt><dd>${statusBadgeHtml(op.status)}</dd>
+        ${op.triggered_by_schedule_id ? `<dt>Schedule</dt><dd><a href="javascript:void(0)" class="link" onclick="closeModal('m-operation-detail'); document.querySelector('.tab[data-key=schedules]').click(); openScheduleDetail(${op.triggered_by_schedule_id});">#${op.triggered_by_schedule_id}</a></dd>` : ""}
+      </dl>
+      ${paramEntries.length ? `
+        <p class="detail-section-label">Parameters</p>
+        <div class="detail-params">
+          ${paramEntries.map(([k, v]) => `<div class="detail-param-row"><span class="k">${PARAM_LABELS[k] || k}</span><span class="v">${formatParamValue(v)}</span></div>`).join("")}
+        </div>` : ""}
+    `;
+    document.getElementById("btn-od-view-log").onclick = () => {
+      closeModal("m-operation-detail");
+      if (op.status === "RUNNING" || op.status === "REQUESTED") openLiveOp(op.id);
+      else viewLog(op.id);
+    };
+  } catch (err) {
+    document.getElementById("od-body").innerHTML = `<p class="cell-sub" style="color:var(--red);">Failed to load: ${err.message}</p>`;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// History table — timeframe + refresh + auto-refresh while anything is live
+// ---------------------------------------------------------------------------
+
+
+document.getElementById("f-history-range").addEventListener("change", (e) => {
+  document.getElementById("custom-range-row").classList.toggle("open", e.target.value === "custom");
+  if (e.target.value !== "custom") loadHistory();
+});
+document.getElementById("btn-apply-custom-range").addEventListener("click", loadHistory);
+
+function currentRangeParams() {
+  const range = document.getElementById("f-history-range").value;
+  if (range !== "custom") return { range, page_size: 50 };
+  const fromVal = document.getElementById("f-range-from").value;
+  const toVal = document.getElementById("f-range-to").value;
+  const params = { page_size: 50 };
+  if (fromVal) params.since = new Date(fromVal).toISOString();
+  if (toVal) params.until = new Date(toVal).toISOString();
+  return params;
+}
+
+async function loadHistory() {
+  const tbody = document.getElementById("history-tbody");
+  const refreshBtn = document.getElementById("btn-refresh-history");
+  const refreshIco = document.getElementById("refresh-ico");
+  refreshBtn.disabled = true;
+  refreshIco.style.animation = "spin 0.8s linear infinite";
+  try {
+    const data = await Api.listOperations(currentRangeParams());
+    if (!data.operations.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--text-muted);">No operations in this window.</td></tr>`;
+    } else {
+      tbody.innerHTML = data.operations.map(op => `
+        <tr class="clickable" style="cursor:pointer;" onclick="openOperationDetail('${op.id}')">
+          <td>${op.triggered_by_schedule_id ? `<a href="javascript:void(0)" class="link" style="font-family:'JetBrains Mono',monospace;font-size:12px;" onclick="event.stopPropagation(); document.querySelector('.tab[data-key=schedules]').click(); openScheduleDetail(${op.triggered_by_schedule_id});">#SCHED-${op.triggered_by_schedule_id}</a>` : `<span class="link" style="font-family:'JetBrains Mono',monospace;font-size:12px;">#${String(op.id).length > 8 ? String(op.id).slice(0, 8) + "…" : op.id}</span>`}</td>
+          <td><div class="op-type-cell"><span class="op-icon">${OP_ICONS[op.operation_type] || ""}</span>${OP_LABELS[op.operation_type] || op.operation_type}</div></td>
+          <td>${op.hostname || "—"}</td>
+          <td>${op.requested_by_username || "—"}</td>
+          <td>${toIST(op.started_at)}</td>
+          <td>${toIST(op.completed_at)}</td>
+          <td>${op.started_at ? formatDuration(op.started_at, op.completed_at) : "—"}</td>
+          <td>${statusBadgeHtml(op.status)}</td>
+          <td><button class="btn btn-sm" onclick="event.stopPropagation(); ${op.status === 'RUNNING' || op.status === 'REQUESTED' ? `openLiveOp('${op.id}')` : `viewLog('${op.id}')`}">
+            ${op.status === "RUNNING" || op.status === "REQUESTED" ? "View live" : "View log"}
+          </button></td>
+        </tr>`).join("");
+    }
+    document.getElementById("history-updated-at").textContent = `Updated ${toIST(new Date().toISOString(), { seconds: true })}`;
+
+    // Keep the table itself fresh while anything is still in flight, even if
+    // the user never opens the live panel.
+    const hasActive = data.operations.some(op => op.status === "RUNNING" || op.status === "REQUESTED");
+    if (HISTORY_AUTOREFRESH_TIMER) clearTimeout(HISTORY_AUTOREFRESH_TIMER);
+    if (hasActive) HISTORY_AUTOREFRESH_TIMER = setTimeout(loadHistory, 4000);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--red);">Failed to load: ${err.message}</td></tr>`;
+  } finally {
+    refreshBtn.disabled = false;
+    refreshIco.style.animation = "";
+  }
+}
+document.getElementById("btn-refresh-history").addEventListener("click", loadHistory);
+
+// ---------------------------------------------------------------------------
+// Scheduled operations — view / edit / cancel
+// ---------------------------------------------------------------------------
+let SCHEDULES_CACHE = {};
+
+function formatScheduleIST(s) {
+  if (s.schedule_type === "ONE_TIME") {
+    return `Once · ${toIST(s.run_at)}`;
+  }
+  if (s.schedule_type === "INTERVAL") {
+    const mins = s.interval_minutes || 0;
+    const label = mins > 0 && mins % 60 === 0 ? `${mins / 60}h` : `${mins}m`;
+    if (s.run_at && !s.last_triggered_at) {
+      return `Every ${label} <br><span class="cell-sub" style="font-size:11px;color:var(--text-muted);">Starts ${toIST(s.run_at)}</span>`;
+    }
+    return `Every ${label}`;
+  }
+  const day = s.day_of_week_ist === null || s.day_of_week_ist === undefined
+    ? "Every day"
+    : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][s.day_of_week_ist];
+  return `Recurring · ${day} ${s.time_of_day_ist || ""} IST`;
+}
+
+document.getElementById("btn-refresh-schedules").addEventListener("click", loadSchedules);
+
+async function loadSchedules() {
+  const tbody = document.getElementById("schedules-tbody");
+  const refreshBtn = document.getElementById("btn-refresh-schedules");
+  const refreshIco = document.getElementById("refresh-sched-ico");
+  if (refreshBtn) { refreshBtn.disabled = true; refreshIco.style.animation = "spin 0.8s linear infinite"; }
+  try {
+    const data = await Api.listSchedules({ active_only: "false" });
+    SCHEDULES_CACHE = Object.fromEntries(data.schedules.map(s => [s.id, s]));
+    if (!data.schedules.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-muted);">No scheduled operations.</td></tr>`;
+    } else {
+      tbody.innerHTML = data.schedules.map(s => {
+        // Only a ONE_TIME schedule ever "completes" — RECURRING and INTERVAL
+        // keep firing, so for them Enabled/Disabled + Edit/Cancel always apply.
+        const fired = s.schedule_type === "ONE_TIME" && !!s.resulting_operation_id;
+
+        const statusHtml = s.status === "CANCELLED"
+          ? '<span class="badge badge-red"><span class="dot"></span>Cancelled</span>'
+          : fired
+            ? statusBadgeHtml(s.last_run_status)
+            : s.is_active
+              ? '<span class="badge badge-green"><span class="dot"></span>Enabled</span>'
+              : '<span class="badge badge-grey"><span class="dot"></span>Disabled</span>';
+
+        const actionsHtml = s.status === "CANCELLED"
+          ? `<button class="btn btn-sm" onclick="openScheduleDetail(${s.id})">View details</button>`
+          : fired
+            ? `<button class="btn btn-sm" onclick="viewLog('${s.resulting_operation_id}')">View log</button>`
+            : `
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:nowrap; white-space:nowrap;">
+                <button class="btn btn-sm" onclick="openEditSchedule(${s.id})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="cancelSchedule(${s.id})">Cancel</button>
+              </div>
+            `;
+
+        const nextRunHtml = (s.status === "CANCELLED" || fired)
+          ? "—"
+          : (s.next_run_at ? toIST(s.next_run_at) : "—");
+
+        return `
+        <tr>
+          <td><a href="javascript:void(0)" class="link" onclick="openScheduleDetail(${s.id})" style="font-family:'JetBrains Mono',monospace;font-size:12px;">#${s.id}</a></td>
+          <td><div class="op-type-cell"><span class="op-icon">${OP_ICONS[s.operation_type] || ""}</span>${OP_LABELS[s.operation_type] || s.operation_type}</div></td>
+          <td>${s.hostname || "—"}</td>
+          <td>${formatScheduleIST(s)}</td>
+          <td>${s.last_triggered_at ? toIST(s.last_triggered_at) : "Never"}</td>
+          <td>${nextRunHtml}</td>
+          <td>${statusHtml}</td>
+          <td>${actionsHtml}</td>
+        </tr>`;
+      }).join("");
+    }
+    document.getElementById("schedules-updated-at").textContent = `Updated ${toIST(new Date().toISOString(), { seconds: true })}`;
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--red);">Failed to load: ${err.message}</td></tr>`;
+  } finally {
+    if (refreshBtn) { refreshBtn.disabled = false; refreshIco.style.animation = ""; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Schedule detail popup — shows current config + change history
+// ---------------------------------------------------------------------------
+let VIEWING_SCHEDULE_ID = null;
+
+async function openScheduleDetail(id) {
+  VIEWING_SCHEDULE_ID = id;
+  const s = SCHEDULES_CACHE[id];
+  if (!s) return;
+  const cancelled = s.status === "CANCELLED";
+  const fired = s.schedule_type === "ONE_TIME" && !!s.resulting_operation_id;
+  const editable = !cancelled && !fired;
+
+  const statusPill = cancelled
+    ? `<span class="detail-status-pill st-cancelled"><span class="dot"></span>Cancelled</span>`
+    : fired
+      ? `<span class="detail-status-pill st-fired"><span class="dot"></span>Executed</span>`
+      : s.is_active
+        ? `<span class="detail-status-pill st-enabled"><span class="dot"></span>Enabled</span>`
+        : `<span class="detail-status-pill st-disabled"><span class="dot"></span>Disabled</span>`;
+
+  document.getElementById("sd-title").textContent = `Schedule #${id}`;
+  document.getElementById("sd-summary").innerHTML = `
+    <div class="detail-head">
+      <span class="op-icon">${OP_ICONS[s.operation_type] || ""}</span>
+      <div>
+        <h4>${OP_LABELS[s.operation_type] || s.operation_type}</h4>
+        <span class="mono-id">Schedule #${id}</span>
+      </div>
+    </div>
+    <dl class="detail-grid">
+      <dt>Server</dt><dd>${s.hostname || "—"}</dd>
+      <dt>Schedule</dt><dd>${formatScheduleIST(s)}</dd>
+      <dt>Last run</dt><dd>${s.last_triggered_at ? toIST(s.last_triggered_at) : "Never"}</dd>
+      <dt>Status</dt><dd>${statusPill}</dd>
+    </dl>
+    ${Object.keys(s.params || {}).filter(k => k !== "password").length ? `
+      <p class="detail-section-label">Parameters</p>
+      <div class="detail-params" style="margin-bottom:18px;">
+        ${Object.entries(s.params).filter(([k, v]) => k !== "password" && v !== null && v !== undefined && v !== "").map(([k, v]) => `<div class="detail-param-row"><span class="k">${PARAM_LABELS[k] || k}</span><span class="v">${formatParamValue(v)}</span></div>`).join("")}
+      </div>` : ""}
+    ${fired ? `<button class="btn btn-sm" style="margin-bottom:14px;" onclick="closeModal('m-schedule-detail'); viewLog('${s.resulting_operation_id}')">View execution log</button>` : ""}
+    ${cancelled ? `<p class="detail-note">This schedule was cancelled and can no longer be edited or re-enabled from here.</p>` : ""}
+  `;
+  document.getElementById("sd-history").innerHTML = `<p class="cell-sub">Loading&hellip;</p>`;
+
+  const editBtn = document.getElementById("btn-sd-edit");
+  editBtn.style.display = editable ? "" : "none";
+
+  openModal("m-schedule-detail");
+
+  if (typeof Api.getScheduleHistory !== "function") {
+    document.getElementById("sd-history").innerHTML =
+      `<p class="cell-sub" style="color:var(--red);">Change-history isn't available yet — the frontend API client on this server needs the <code>getScheduleHistory</code> helper added.</p>`;
+    return;
+  }
+
+  try {
+    const data = await Api.getScheduleHistory(id);
+    const entries = data.history || data.entries || [];
+    if (!entries.length) {
+      document.getElementById("sd-history").innerHTML = `<p class="cell-sub">No changes recorded yet.</p>`;
+    } else {
+      document.getElementById("sd-history").innerHTML = `<div class="history-timeline">` + entries.map(h => `
+        <div class="history-entry">
+          <p class="h-actor">${h.changed_by || h.actor || "Unknown"} <span class="when">&middot; ${toIST(h.changed_at || h.ts)}</span></p>
+          ${h.change_summary ? `<p class="h-summary">${h.change_summary}</p>` : ""}
+          ${h.comment ? `<p class="h-comment">"${h.comment}"</p>` : ""}
+        </div>`).join("") + `</div>`;
+    }
+  } catch (err) {
+    document.getElementById("sd-history").innerHTML = `<p class="cell-sub" style="color:var(--red);">Failed to load history: ${err.message}</p>`;
+  }
+}
+
+document.getElementById("btn-sd-edit").addEventListener("click", () => {
+  closeModal("m-schedule-detail");
+  if (VIEWING_SCHEDULE_ID != null) openEditSchedule(VIEWING_SCHEDULE_ID);
+});
+
+// Builds a human-readable diff between the cached schedule and the new payload,
+// so the DBA doesn't have to type out what changed by hand — only WHY.
+function buildChangeSummary(original, payload) {
+  const parts = [];
+  if (payload.operation_type && payload.operation_type !== original.operation_type) {
+    parts.push(`operation: ${OP_LABELS[original.operation_type] || original.operation_type} → ${OP_LABELS[payload.operation_type] || payload.operation_type}`);
+  }
+  if (payload.run_at !== undefined) {
+    const oldVal = original.run_at ? toIST(original.run_at) : "—";
+    const newVal = payload.run_at ? toIST(payload.run_at) : "—";
+    if (oldVal !== newVal) parts.push(`run at: ${oldVal} → ${newVal}`);
+  }
+  if (payload.time_of_day && payload.time_of_day !== original.time_of_day_ist) {
+    parts.push(`time: ${original.time_of_day_ist || "—"} → ${payload.time_of_day}`);
+  }
+  if (payload.day_of_week !== undefined) {
+    const dayName = (d) => d === null || d === undefined ? "Every day" :
+      ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][d];
+    const oldDay = dayName(original.day_of_week_ist);
+    const newDay = dayName(payload.day_of_week);
+    if (oldDay !== newDay) parts.push(`day: ${oldDay} → ${newDay}`);
+  }
+  if (payload.interval_minutes && payload.interval_minutes !== original.interval_minutes) {
+    parts.push(`interval: ${original.interval_minutes || 0}m → ${payload.interval_minutes}m`);
+  }
+  if (payload.is_active !== undefined && payload.is_active !== original.is_active) {
+    parts.push(`status: ${original.is_active ? "enabled" : "disabled"} → ${payload.is_active ? "enabled" : "disabled"}`);
+  }
+  return parts.join("; ");
+}
+
+let EDITING_SCHEDULE_ID = null;
+function openEditSchedule(id) {
+  const s = SCHEDULES_CACHE[id];
+  if (!s) return;
+  EDITING_SCHEDULE_ID = id;
+  document.getElementById("edit-sched-summary").textContent =
+    `${OP_LABELS[s.operation_type] || s.operation_type} on ${s.hostname}`;
+  const SWAPPABLE = ["start", "stop", "restart"];
+  const opField = document.getElementById("edit-op-type-field");
+  if (SWAPPABLE.includes(s.operation_type)) {
+    opField.style.display = "";
+    document.getElementById("e-op-type").value = s.operation_type;
+  } else {
+    opField.style.display = "none"; // params-bearing type — not swappable from this modal
+  }
+  document.getElementById("edit-onetime-field").style.display = s.schedule_type === "ONE_TIME" ? "" : "none";
+  document.getElementById("edit-recurring-field").style.display = s.schedule_type === "RECURRING" ? "" : "none";
+  document.getElementById("edit-interval-field").style.display = s.schedule_type === "INTERVAL" ? "" : "none";
+  if (s.schedule_type === "ONE_TIME" && s.run_at) {
+    const istDate = new Date(new Date(s.run_at).getTime() + 5.5 * 3600 * 1000);
+    document.getElementById("e-run-at-date").value = istDate.toISOString().slice(0, 10);
+    document.getElementById("e-run-at-time").value = istDate.toISOString().slice(11, 16);
+  } else if (s.schedule_type === "RECURRING") {
+    document.getElementById("e-day-of-week").value = s.day_of_week_ist === null || s.day_of_week_ist === undefined ? "" : s.day_of_week_ist;
+    document.getElementById("e-time-of-day").value = s.time_of_day_ist || "";
+  } else if (s.schedule_type === "INTERVAL") {
+    const mins = s.interval_minutes || 0;
+    const useHours = mins > 0 && mins % 60 === 0;
+    document.getElementById("e-interval-value").value = useHours ? mins / 60 : mins;
+    document.getElementById("e-interval-unit").value = useHours ? "hours" : "minutes";
+    if (s.run_at) {
+      const istDate = new Date(new Date(s.run_at).getTime() + 5.5 * 3600 * 1000);
+      document.getElementById("e-interval-start-date").value = istDate.toISOString().slice(0, 10);
+      document.getElementById("e-interval-start-time").value = istDate.toISOString().slice(11, 16);
+    } else {
+      document.getElementById("e-interval-start-date").value = "";
+      document.getElementById("e-interval-start-time").value = "";
+    }
+  }
+  document.getElementById("e-is-active").checked = s.is_active;
+  document.getElementById("e-change-reason").value = "";
+  document.getElementById("e-error").style.display = "none";
+  openModal("m-edit-schedule");
+}
+
+document.getElementById("btn-save-schedule").addEventListener("click", async () => {
+  const s = SCHEDULES_CACHE[EDITING_SCHEDULE_ID];
+  const errorEl = document.getElementById("e-error");
+  errorEl.style.display = "none";
+
+  const reason = document.getElementById("e-change-reason").value.trim();
+  if (!reason) {
+    errorEl.textContent = "Please enter a reason for this change (used for the audit trail).";
+    errorEl.style.display = "";
+    return;
+  }
+
+  const payload = { is_active: document.getElementById("e-is-active").checked };
+  const SWAPPABLE = ["start", "stop", "restart"];
+  if (SWAPPABLE.includes(s.operation_type)) {
+    const newType = document.getElementById("e-op-type").value;
+    if (newType !== s.operation_type) payload.operation_type = newType;
+  }
+  try {
+    if (s.schedule_type === "ONE_TIME") {
+      const date = document.getElementById("e-run-at-date").value;
+      const time = document.getElementById("e-run-at-time").value;
+      if (!date || !time) throw new Error("Pick a date and time.");
+      payload.run_at = istInputToIsoWithOffset(date, time);
+    } else if (s.schedule_type === "RECURRING") {
+      const time = document.getElementById("e-time-of-day").value;
+      if (!time) throw new Error("Pick a time.");
+      const dow = document.getElementById("e-day-of-week").value;
+      payload.time_of_day = time;
+      payload.day_of_week = dow === "" ? null : Number(dow);
+    } else {
+      const value = Number(document.getElementById("e-interval-value").value);
+      const unit = document.getElementById("e-interval-unit").value;
+      if (!value || value < 1) throw new Error("Enter an interval of at least 1.");
+      payload.interval_minutes = unit === "hours" ? value * 60 : value;
+
+      const sDate = document.getElementById("e-interval-start-date").value;
+      const sTime = document.getElementById("e-interval-start-time").value;
+      if (sDate && sTime) payload.run_at = istInputToIsoWithOffset(sDate, sTime);
+      else if (sDate || sTime) throw new Error("Pick both date and time for the starting point, or leave both blank.");
+      else payload.run_at = "";
+    }
+    payload.comment = reason;
+    payload.change_summary = buildChangeSummary(s, payload);
+
+    await Api.editSchedule(EDITING_SCHEDULE_ID, payload);
+    showToast("Schedule updated");
+    closeModal("m-edit-schedule");
+    loadSchedules();
+  } catch (err) {
+    errorEl.textContent = err.status === 403 ? "You don't have permission to edit scheduled operations."
+      : err.status === 409 ? "This schedule was already cancelled and can no longer be edited."
+      : err.message;
+    errorEl.style.display = "";
+  }
+});
+
+async function cancelSchedule(id) {
+  if (!confirm("Cancel this scheduled operation?")) return;
+  try {
+    await Api.cancelSchedule(id);
+    showToast("Schedule cancelled");
+    loadSchedules();
+  } catch (err) {
+    showToast(err.status === 403 ? "You don't have permission to cancel this schedule." : `Could not cancel: ${err.message}`, "!");
+  }
+}
+loadHistory();
+loadSchedules();
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Audit Logs
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Browse the platform audit trail; filter by user, action, and resource.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Logs · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+<div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span></a><a class="nav-item" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item active" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">Workspace</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">Audit Logs</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Audit Logs</h1>
+    <p class="page-sub">Full audit trail of every action taken on the platform</p>
+  </div>
+</div>
+
+<div class="card card-pad" style="margin-bottom:16px;">
+  <div class="flex gap-10" style="flex-wrap:wrap;">
+    <div class="search-box" style="width:260px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="audit-search" placeholder="Search user, server, action" style="border:none;background:none;outline:none;width:100%;font-size:13px;"></div>
+    <select id="audit-action-filter" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All actions</option>
+      <option value="restart">Restart</option>
+      <option value="upgrade">Upgrade</option>
+      <option value="config">Configuration change</option>
+      <option value="failover">Failover</option>
+      <option value="login">Login</option>
+    </select>
+    <button class="btn btn-sm" id="btn-export-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg> Export</button>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table class="data" id="audit-table">
+      <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Source IP</th></tr></thead>
+      <tbody><tr><td colspan="5" class="cell-sub" style="padding:20px;">Loading&hellip;</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+<script>
+function fmtTs(iso) {
+  return iso ? new Date(iso).toLocaleString() : '&mdash;';
+}
+
+function currentAuditFilters() {
+  const params = {};
+  const action = document.getElementById('audit-action-filter').value;
+  if (action) params.action = action;
+  const search = document.getElementById('audit-search').value.trim();
+  if (search) params.search = search;
+  return params;
+}
+
+function renderAuditRows(logs) {
+  const tbody = document.querySelector('#audit-table tbody');
+  if (!logs.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="cell-sub" style="padding:20px;">No audit events found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = logs.map(a => {
+    const target = a.target_type ? `${a.target_type} ${a.target_id || ''}`.trim() : '&mdash;';
+    return `<tr>
+      <td>${fmtTs(a.ts)}</td>
+      <td>${a.actor_username || 'system'}</td>
+      <td>${a.action}</td>
+      <td>${target}</td>
+      <td>${a.source_ip || '&mdash;'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadAudit() {
+  const tbody = document.querySelector('#audit-table tbody');
+  tbody.innerHTML = '<tr><td colspan="5" class="cell-sub" style="padding:20px;">Loading&hellip;</td></tr>';
+  try {
+    const data = await Api.listAudit(currentAuditFilters());
+    renderAuditRows(data.logs);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" class="cell-sub" style="padding:20px;color:var(--red);">Failed to load audit logs: ${err.message}</td></tr>`;
+  }
+}
+
+document.getElementById('audit-action-filter').addEventListener('change', loadAudit);
+document.getElementById('audit-search').addEventListener('input', () => {
+  clearTimeout(window._auditSearchDebounce);
+  window._auditSearchDebounce = setTimeout(loadAudit, 350);
+});
+document.getElementById('btn-export-audit').addEventListener('click', () => {
+  window.open(Api.auditExportUrl(currentAuditFilters()), '_blank');
+});
+
+loadAudit();
+</script>
+
+</div>
+</div>
+</div>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
+
+

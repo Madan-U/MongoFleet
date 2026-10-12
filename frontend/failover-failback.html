@@ -1,0 +1,334 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Failover / Failback
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Trigger and track replica-set stepdown (failover) and primary restoration (failback).
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Failover / Failback · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+<div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span></a><a class="nav-item" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item active" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">DB Operations</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">Failover / Failback</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Failover / Failback</h1>
+    <p class="page-sub">Controlled primary switch-over with health verification and approval</p>
+  </div>
+  <div class="wf-head-actions">
+    <span class="tag mono">rs-orders-01</span>
+    <span class="badge badge-green"><span class="dot"></span>Replica set healthy</span>
+  </div>
+</div>
+
+<div class="tabs" data-group="ff">
+  <div class="tab active" data-target="ff-failover" data-key="failover">Failover</div>
+  <div class="tab" data-target="ff-failback" data-key="failback">Failback</div>
+</div>
+
+<!-- ============================== FAILOVER ============================== -->
+<div class="tab-panel active" data-group="ff" id="ff-failover">
+  <div class="stat-grid compact">
+    <div class="card stat-card tint-red">
+      <div class="stat-top"><span class="stat-label">Current primary</span><span class="stat-icon icon-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span></div>
+      <div class="stat-value sm">mongo-prod-01</div>
+      <div class="stat-foot">Accepting all writes</div>
+    </div>
+    <div class="card stat-card tint-green">
+      <div class="stat-top"><span class="stat-label">Eligible targets</span><span class="stat-icon icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></div>
+      <div class="stat-value">1 of 2</div>
+      <div class="stat-foot">Healthy secondaries within lag limit</div>
+    </div>
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Highest lag</span><span class="stat-icon icon-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></div>
+      <div class="stat-value">4.0s</div>
+      <div class="stat-foot">mongo-prod-03 &middot; limit 2.0s</div>
+    </div>
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Expected impact</span><span class="stat-icon icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span></div>
+      <div class="stat-value">2&ndash;5s</div>
+      <div class="stat-foot">Write pause during election</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Choose failover target</h2>
+          <p class="panel-sub">Only healthy secondaries within the replication-lag limit can be promoted</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="member-list" id="ff-members" role="radiogroup" aria-label="Failover target">
+          <div class="member is-primary">
+            <span class="member-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>
+            <div class="member-main">
+              <div class="member-name">mongo-prod-01 <span class="tag">PRIMARY</span></div>
+              <div class="member-meta"><span>Lag 0.0s</span></div>
+            </div>
+            <div class="member-side"><span class="badge badge-green"><span class="dot"></span>Healthy</span><span class="cell-sub" style="margin:0;">Current primary</span></div>
+          </div>
+
+          <div class="member selected" role="radio" aria-checked="true" tabindex="0" data-host="mongo-prod-02">
+            <span class="member-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>
+            <div class="member-main">
+              <div class="member-name">mongo-prod-02 <span class="tag">SECONDARY</span></div>
+              <div class="member-meta"><span class="metric-inline"><span class="val">0.2s</span><span class="meter"><span style="width:10%"></span></span></span><span>replication lag</span></div>
+            </div>
+            <div class="member-side"><span class="badge badge-green"><span class="dot"></span>Healthy</span><span class="badge badge-blue">Recommended</span></div>
+            <span class="member-radio" aria-hidden="true"></span>
+          </div>
+
+          <div class="member disabled" role="radio" aria-checked="false" aria-disabled="true" data-host="mongo-prod-03">
+            <span class="member-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>
+            <div class="member-main">
+              <div class="member-name">mongo-prod-03 <span class="tag">SECONDARY</span></div>
+              <div class="member-meta"><span class="metric-inline"><span class="val">4.0s</span><span class="meter warn"><span style="width:100%"></span></span></span><span>replication lag</span></div>
+            </div>
+            <div class="member-side"><span class="badge badge-amber"><span class="dot"></span>Warning</span><span class="cell-sub" style="margin:0;">Lag too high</span></div>
+          </div>
+        </div>
+
+        <div class="banner banner-info" style="margin:18px 0 0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Recommendation</strong>mongo-prod-02 is the closest healthy secondary and is recommended as the failover target.</div></div>
+      </div>
+    </section>
+
+    <section class="panel sticky-col">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Confirm failover</h2>
+          <p class="panel-sub">Review the impact before sending for approval</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="kv">
+          <div class="kv-row"><span class="k">Current primary</span><span class="v mono">mongo-prod-01</span></div>
+          <div class="kv-row"><span class="k">Failover target</span><span class="v mono" id="ff-target-name">mongo-prod-02</span></div>
+          <div class="kv-row"><span class="k">Expected impact</span><span class="v">~2&ndash;5s write unavailability during election</span></div>
+          <div class="kv-row"><span class="k">Approval required</span><span class="v">Yes &mdash; Senior DBA</span></div>
+        </div>
+        <div class="field"><label for="ff-reason">Reason</label><textarea id="ff-reason" rows="3" placeholder="e.g. planned maintenance on mongo-prod-01"></textarea></div>
+        <div class="action-row">
+          <button class="btn btn-danger" onclick="openModal('m-failover-confirm')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Initiate failover</button>
+        </div>
+        <p class="action-note">The request is sent to a Senior DBA. Nothing runs until it is approved.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============================== FAILBACK ============================== -->
+<div class="tab-panel" data-group="ff" id="ff-failback">
+  <div class="stat-grid compact">
+    <div class="card stat-card tint-red">
+      <div class="stat-top"><span class="stat-label">Current primary</span><span class="stat-icon icon-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span></div>
+      <div class="stat-value sm">mongo-prod-02</div>
+      <div class="stat-foot">Since failover on Sep 6</div>
+    </div>
+    <div class="card stat-card tint-green">
+      <div class="stat-top"><span class="stat-label">Original primary</span><span class="stat-icon icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></div>
+      <div class="stat-value sm">mongo-prod-01</div>
+      <div class="stat-foot">Healthy and caught up</div>
+    </div>
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Replication lag</span><span class="stat-icon icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></div>
+      <div class="stat-value">0.1s</div>
+      <div class="stat-foot">mongo-prod-01 behind primary</div>
+    </div>
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Version</span><span class="stat-icon icon-violet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><path d="M7 7h.01"/></svg></span></div>
+      <div class="stat-value">Match</div>
+      <div class="stat-foot">Same as cluster version</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Failback readiness</h2>
+          <p class="panel-sub">Confirm the original primary is stable before switching back</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="checklist">
+          <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Original primary healthy</span><span class="detail">mongo-prod-01</span></div>
+          <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Replication lag</span><span class="detail">0.1s</span></div>
+          <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Version compatibility</span><span class="detail">Matches cluster</span></div>
+        </div>
+        <div class="banner banner-amber" style="margin:18px 0 0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><div><strong>Failback is manual by design</strong>This platform never fails back automatically. Trigger it only after confirming the original primary&rsquo;s stability.</div></div>
+      </div>
+    </section>
+
+    <section class="panel sticky-col">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Confirm failback</h2>
+          <p class="panel-sub">mongo-prod-01 returns to PRIMARY</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="kv">
+          <div class="kv-row"><span class="k">Promote</span><span class="v mono">mongo-prod-01</span></div>
+          <div class="kv-row"><span class="k">Step down</span><span class="v mono">mongo-prod-02</span></div>
+          <div class="kv-row"><span class="k">Approval required</span><span class="v">Yes &mdash; Senior DBA</span></div>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="openModal('m-failback-confirm')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Start controlled failback</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal-overlay" id="m-failback-confirm">
+  <div class="modal">
+    <div class="modal-head"><h3>Confirm failback</h3><button class="icon-btn" onclick="closeModal('m-failback-confirm')" aria-label="Close">&times;</button></div>
+    <div class="modal-body">
+      <p style="margin:0;">mongo-prod-01 will be promoted back to PRIMARY and mongo-prod-02 will step down to SECONDARY. This action requires approval before it executes.</p>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('m-failback-confirm')">Cancel</button><button class="btn btn-primary" onclick="closeModal('m-failback-confirm');showToast('Failback request sent for approval')">Send for approval</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="m-failover-confirm">
+  <div class="modal">
+    <div class="modal-head"><h3>Confirm failover</h3><button class="icon-btn" onclick="closeModal('m-failover-confirm')" aria-label="Close">&times;</button></div>
+    <div class="modal-body">
+      <p style="margin:0;">mongo-prod-01 will step down and <strong id="ff-modal-target">mongo-prod-02</strong> will be promoted to PRIMARY. This action requires approval before it executes.</p>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('m-failover-confirm')">Cancel</button><button class="btn btn-danger" onclick="closeModal('m-failover-confirm');showToast('Failover request sent for approval')">Send for approval</button></div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+
+<script>
+(function () {
+  var list = document.getElementById('ff-members');
+  if (!list) return;
+  function pick(el) {
+    if (!el || el.classList.contains('disabled') || el.classList.contains('is-primary')) return;
+    list.querySelectorAll('.member[role="radio"]').forEach(function (m) {
+      var on = m === el;
+      m.classList.toggle('selected', on);
+      m.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    var host = el.dataset.host;
+    document.getElementById('ff-target-name').textContent = host;
+    document.getElementById('ff-modal-target').textContent = host;
+  }
+  list.addEventListener('click', function (e) { pick(e.target.closest('.member')); });
+  list.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e.target.closest('.member')); }
+  });
+})();
+</script>
+</body>
+</html>
+
+

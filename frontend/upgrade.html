@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Upgrades
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Plan and execute MongoDB version upgrade workflows.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upgrades · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+<div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span></a><a class="nav-item active" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">DB Operations</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">Upgrades</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Upgrade MongoDB</h1>
+    <p class="page-sub">Minor and major version upgrades, with pre-checks and a safe rolling plan</p>
+  </div>
+</div>
+
+<div class="wizard" aria-label="Upgrade progress">
+  <div class="wz-step done"><span class="wz-num">&#10003;</span><div class="wz-text"><strong>Select target</strong><span>Replica set &amp; version</span></div></div>
+  <div class="wz-step active blocked"><span class="wz-num">2</span><div class="wz-text"><strong>Readiness checks</strong><span>1 check needs attention</span></div></div>
+  <div class="wz-step"><span class="wz-num">3</span><div class="wz-text"><strong>Rolling plan</strong><span>Secondaries first</span></div></div>
+</div>
+
+<div class="stat-grid compact">
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Current version</span><span class="stat-icon icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l10 5-10 5L2 7l10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span></div>
+      <div class="stat-value">8.0.17</div>
+      <div class="stat-foot">Running on rs-orders-01</div>
+    </div>
+    <div class="card stat-card tint-red">
+      <div class="stat-top"><span class="stat-label">Target version</span><span class="stat-icon icon-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span></div>
+      <div class="stat-value" id="up-target-stat">8.0.19</div>
+      <div class="stat-foot"><span id="up-target-foot">Minor upgrade</span></div>
+    </div>
+    <div class="card stat-card tint-green">
+      <div class="stat-top"><span class="stat-label">Members online</span><span class="stat-icon icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span></div>
+      <div class="stat-value">4 / 4</div>
+      <div class="stat-foot">All members reachable</div>
+    </div>
+    <div class="card stat-card tint-navy">
+      <div class="stat-top"><span class="stat-label">Readiness</span><span class="stat-icon icon-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></div>
+      <div class="stat-value">5 / 7</div>
+      <div class="stat-foot">1 failed &middot; 1 pending</div>
+    </div>
+</div>
+
+<div class="two-col">
+  <div class="stack">
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2 class="panel-title">1. Select target</h2><p class="panel-sub">Choose the replica set and the version to move to</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field full"><label for="up-rs">Replica set</label><select id="up-rs"><option>rs-orders-01 (mongo-prod-01/02/03/04)</option><option>rs-pay-stage (mongo-stage-01)</option></select></div>
+          <div class="field"><label for="up-current">Current version</label><input id="up-current" value="8.0.17" disabled></div>
+          <div class="field"><label for="up-target">Target version</label>
+            <select id="up-target">
+              <option value="8.0.19" data-type="minor">8.0.19 (minor)</option>
+              <option value="8.2.1" data-type="major">8.2.1 (major)</option>
+            </select>
+          </div>
+          <div class="field full" style="margin-bottom:0;"><p class="hint" id="up-hint" style="margin:0;">Minor upgrades follow the standard rolling plan. Major upgrades follow a stricter plan and always require Senior DBA approval.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2 class="panel-title">2. Upgrade readiness</h2><p class="panel-sub">Checked against rs-orders-01 right now</p></div>
+        <span class="badge badge-red"><span class="dot"></span>Blocked</span>
+      </div>
+      <div class="panel-body">
+        <div class="ready-summary">
+          <div class="ready-bar" role="img" aria-label="5 passed, 1 failed, 1 pending"><span class="p" style="width:71.4%"></span><span class="f" style="width:14.3%"></span><span class="w" style="width:14.3%"></span></div>
+          <div class="ready-counts"><span class="badge badge-green">5 passed</span><span class="badge badge-red">1 failed</span><span class="badge badge-grey">1 pending</span></div>
+        </div>
+        <div class="checklist">
+      <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Replica set healthy</span><span class="detail">4/4 members up</span></div>
+      <div class="check-row fail"><span class="ico">&#10007;</span><span class="label">Replication lag acceptable</span><span class="detail">mongo-prod-03 at 4.0s (limit 2.0s)</span></div>
+      <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Disk space sufficient</span><span class="detail">42% free on all members</span></div>
+      <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Backup available</span><span class="detail">Last verified 3h ago</span></div>
+      <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Target version supported on this OS</span><span class="detail">RHEL 8.9</span></div>
+      <div class="check-row pass"><span class="ico">&#10003;</span><span class="label">Upgrade path valid</span><span class="detail"><span id="up-path">8.0.17 &rarr; 8.0.19</span></span></div>
+      <div class="check-row pending"><span class="ico">&#9679;</span><span class="label">No active maintenance window conflict</span><span class="detail">Checking&hellip;</span></div>
+        </div>
+        <div class="banner banner-red" style="margin:18px 0 16px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><div><strong>Upgrade blocked</strong>Resolve the replication lag on mongo-prod-03 before continuing.</div></div>
+        <div class="action-row"><button class="btn btn-primary" disabled>Continue to rolling plan</button></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel sticky-col">
+    <div class="panel-head">
+      <div><h2 class="panel-title">3. Rolling upgrade plan</h2><p class="panel-sub">Generated automatically &mdash; secondaries first, primary last</p></div>
+    </div>
+    <div class="panel-body">
+      <div class="stepper">
+      <div class="step done"><div class="step-line"></div><div class="step-dot">&#10003;</div><div class="step-body"><div class="step-title">Upgrade mongo-prod-04 (arbiter)</div></div></div>
+      <div class="step "><div class="step-line"></div><div class="step-dot">2</div><div class="step-body"><div class="step-title">Upgrade mongo-prod-02 (secondary)</div><div class="step-desc">Restart &rarr; verify health &rarr; verify replication</div></div></div>
+      <div class="step "><div class="step-line"></div><div class="step-dot">3</div><div class="step-body"><div class="step-title">Upgrade mongo-prod-03 (secondary)</div><div class="step-desc">Blocked until replication lag clears</div></div></div>
+      <div class="step "><div class="step-line"></div><div class="step-dot">4</div><div class="step-body"><div class="step-title">Step down mongo-prod-01</div><div class="step-desc">Controlled primary step-down</div></div></div>
+      <div class="step "><div class="step-dot">5</div><div class="step-body"><div class="step-title">Upgrade former primary &amp; confirm cluster version</div></div></div>
+      </div>
+      <div class="banner banner-info" style="margin:20px 0 0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div>Nodes are never upgraded simultaneously. Each step verifies health and replication before moving to the next.</div></div>
+    </div>
+  </section>
+</div>
+
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+
+<script>
+(function () {
+  var sel = document.getElementById('up-target');
+  if (!sel) return;
+  function sync() {
+    var opt = sel.options[sel.selectedIndex];
+    var major = opt.dataset.type === 'major';
+    document.getElementById('up-target-stat').textContent = opt.value;
+    document.getElementById('up-target-foot').textContent = major ? 'Major upgrade \u00b7 Senior DBA approval' : 'Minor upgrade';
+    document.getElementById('up-path').innerHTML = '8.0.17 &rarr; ' + opt.value;
+    document.getElementById('up-hint').textContent = major
+      ? 'Major upgrades follow a stricter rolling plan and always require Senior DBA approval.'
+      : 'Minor upgrades follow the standard rolling plan. Major upgrades follow a stricter plan and always require Senior DBA approval.';
+  }
+  sel.addEventListener('change', sync);
+})();
+</script>
+</body>
+</html>
+
+
+

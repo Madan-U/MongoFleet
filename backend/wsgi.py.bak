@@ -1,0 +1,12 @@
+"""
+Author      : Madan U
+Email       : madanu135@gmail.com
+Date        : 2026-09-09
+Script Path : /data/database-management/backend/wsgi.py
+Description : WSGI entrypoint used by gunicorn in production.
+               gunicorn -c gunicorn.conf.py wsgi:app
+"""
+
+from app import create_app
+
+app = create_app()

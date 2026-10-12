@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Alerts
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : View and manage alert rules; see triggered alerts across the MongoDB fleet.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alerts · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+<div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span></a><a class="nav-item" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item active" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">Workspace</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">Alerts</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Alerts</h1>
+    <p class="page-sub">Raised automatically from the audit trail by the alert rule engine</p>
+  </div>
+  <div class="flex gap-8">
+    <button class="btn btn-sm" id="btn-check-now" title="Runs the same rule-matching cycle as the scheduled poller, right now">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg> Check now
+    </button>
+    <button class="btn btn-sm btn-primary" id="btn-refresh">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Refresh
+    </button>
+  </div>
+</div>
+
+<div class="stat-grid" id="alert-stat-grid">
+  <div class="card stat-card">
+    <div class="stat-top"><span class="stat-label">CRITICAL</span><span class="stat-icon" style="background:var(--red-bg);color:var(--red);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div>
+    <div class="stat-value" id="stat-critical">&hellip;</div>
+    <div class="stat-foot">In selected range</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-top"><span class="stat-label">WARNING</span><span class="stat-icon" style="background:var(--amber-bg);color:var(--amber);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span></div>
+    <div class="stat-value" id="stat-warning">&hellip;</div>
+    <div class="stat-foot">In selected range</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-top"><span class="stat-label">INFO</span><span class="stat-icon" style="background:var(--blue-bg);color:var(--blue);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span></div>
+    <div class="stat-value" id="stat-info">&hellip;</div>
+    <div class="stat-foot">In selected range</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-top"><span class="stat-label">TOTAL</span><span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></div>
+    <div class="stat-value" id="stat-total">&hellip;</div>
+    <div class="stat-foot" id="stat-total-foot">&nbsp;</div>
+  </div>
+</div>
+
+<div class="card card-pad" style="margin-bottom:16px;">
+  <div class="flex gap-10" style="flex-wrap:wrap;align-items:center;">
+    <select id="filter-range" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="30m">Last 30 minutes</option>
+      <option value="1h">Last 1 hour</option>
+      <option value="6h">Last 6 hours</option>
+      <option value="24h" selected>Last 24 hours</option>
+      <option value="7d">Last 7 days</option>
+      <option value="custom">Custom range&hellip;</option>
+    </select>
+    <input type="datetime-local" id="filter-from" style="display:none;padding:7px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+    <span id="filter-to-sep" style="display:none;color:var(--text-muted);font-size:13px;">to</span>
+    <input type="datetime-local" id="filter-to" style="display:none;padding:7px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+    <select id="filter-severity" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All severities</option>
+      <option value="CRITICAL">Critical only</option>
+      <option value="WARNING">Warning only</option>
+      <option value="INFO">Info only</option>
+      <option value="CRITICAL,WARNING">Critical + Warning</option>
+    </select>
+    <select id="filter-status" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">Any status</option>
+      <option value="SENT">Sent</option>
+      <option value="PENDING">Pending</option>
+      <option value="FAILED">Failed</option>
+    </select>
+    <div class="search-box" style="width:220px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="filter-search" placeholder="Search title, actor&hellip;" style="border:none;background:none;outline:none;width:100%;font-size:13px;"></div>
+  </div>
+</div>
+
+<div class="card" id="alerts-card">
+  <div id="alerts-list"><p class="cell-sub" style="padding:20px;">Loading&hellip;</p></div>
+</div>
+
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+<script>
+const severityIco = {
+  CRITICAL: { cls: 'red', svg: '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>' },
+  WARNING:  { cls: 'amber', svg: '<path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>' },
+  INFO:     { cls: 'blue', svg: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>' },
+};
+const statusBadge = {
+  SENT: '<span class="badge badge-green"><span class="dot"></span>Sent</span>',
+  PENDING: '<span class="badge badge-blue"><span class="dot"></span>Pending</span>',
+  FAILED: '<span class="badge badge-red"><span class="dot"></span>Failed</span>',
+};
+
+function fmtTs(iso) {
+  return new Date(iso).toLocaleString();
+}
+
+function currentFilters() {
+  const range = document.getElementById('filter-range').value;
+  const params = { range };
+  if (range === 'custom') {
+    const from = document.getElementById('filter-from').value;
+    const to = document.getElementById('filter-to').value;
+    if (from) params.from = new Date(from).toISOString();
+    if (to) params.to = new Date(to).toISOString();
+  }
+  const severity = document.getElementById('filter-severity').value;
+  if (severity) params.severity = severity;
+  const status = document.getElementById('filter-status').value;
+  if (status) params.status = status;
+  const search = document.getElementById('filter-search').value.trim();
+  if (search) params.search = search;
+  return params;
+}
+
+function renderAlerts(data) {
+  document.getElementById('stat-critical').textContent = data.severity_counts.CRITICAL || 0;
+  document.getElementById('stat-warning').textContent = data.severity_counts.WARNING || 0;
+  document.getElementById('stat-info').textContent = data.severity_counts.INFO || 0;
+  document.getElementById('stat-total').textContent = data.total;
+  document.getElementById('stat-total-foot').textContent =
+    `Showing ${data.alerts.length} of ${data.total}`;
+
+  const list = document.getElementById('alerts-list');
+  if (!data.alerts.length) {
+    list.innerHTML = '<p class="cell-sub" style="padding:24px;">No alerts in this range.</p>';
+    return;
+  }
+  list.innerHTML = data.alerts.map(a => {
+    const sev = severityIco[a.severity] || severityIco.INFO;
+    const targetTxt = a.target_type ? `${a.target_type} ${a.target_id || ''}`.trim() : '&mdash;';
+    return `
+      <div class="alert-item" style="padding:14px 18px;">
+        <div class="alert-ico ${sev.cls}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${sev.svg}</svg></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex" style="justify-content:space-between;gap:10px;align-items:flex-start;">
+            <p class="alert-title">${a.title}</p>
+            ${statusBadge[a.status] || ''}
+          </div>
+          <p class="alert-desc">${a.message || ''}</p>
+          <p class="cell-sub">${fmtTs(a.ts)} &middot; ${a.actor_username || 'system'} &middot; ${a.action} &middot; ${targetTxt}${a.status === 'FAILED' && a.error_message ? ' &middot; ' + a.error_message : ''}</p>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadAlerts() {
+  document.getElementById('alerts-list').innerHTML = '<p class="cell-sub" style="padding:20px;">Loading&hellip;</p>';
+  try {
+    const data = await Api.listAlerts(currentFilters());
+    renderAlerts(data);
+  } catch (err) {
+    document.getElementById('alerts-list').innerHTML =
+      `<p class="cell-sub" style="padding:20px;color:var(--red);">Failed to load alerts: ${err.message}</p>`;
+  }
+  loadAlertBadge();
+}
+
+document.getElementById('filter-range').addEventListener('change', (e) => {
+  const isCustom = e.target.value === 'custom';
+  document.getElementById('filter-from').style.display = isCustom ? '' : 'none';
+  document.getElementById('filter-to-sep').style.display = isCustom ? '' : 'none';
+  document.getElementById('filter-to').style.display = isCustom ? '' : 'none';
+  if (!isCustom) loadAlerts();
+});
+['filter-from', 'filter-to', 'filter-severity', 'filter-status'].forEach(id =>
+  document.getElementById(id).addEventListener('change', loadAlerts)
+);
+document.getElementById('filter-search').addEventListener('input', () => {
+  clearTimeout(window._alertSearchDebounce);
+  window._alertSearchDebounce = setTimeout(loadAlerts, 350);
+});
+document.getElementById('btn-refresh').addEventListener('click', loadAlerts);
+document.getElementById('btn-check-now').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = 'Checking&hellip;';
+  try {
+    const result = await Api.pollAlertsNow();
+    if (result.skipped) {
+      showToast('A check was already running — try again shortly.');
+    } else {
+      showToast(`Checked audit trail — ${result.generate.created} new alert(s) raised.`);
+    }
+    await loadAlerts();
+  } catch (err) {
+    showToast('Check failed: ' + err.message, '!');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+});
+
+loadAlerts();
+</script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>

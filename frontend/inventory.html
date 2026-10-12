@@ -1,0 +1,575 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Inventory
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Register, browse, and manage the full inventory of MongoDB server hosts.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MongoDB Servers · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style id="inv-responsive-fix">
+  /* ============================================================
+     MongoDB Servers page — responsive layout
+     ============================================================ */
+
+  /* Page header: title on top, action buttons below on narrow screens */
+  @media (max-width: 720px) {
+    .page-head {
+      flex-direction: column;
+      align-items: stretch !important;
+      gap: 12px;
+    }
+    .page-head > div:last-child {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      width: 100%;
+    }
+    .page-head > div:last-child .btn {
+      flex: 1 1 0;
+      justify-content: center;
+      white-space: nowrap;
+      font-size: 12.5px;
+      padding: 9px 12px;
+    }
+    .page-title { font-size: 20px; }
+  }
+
+  /* Filter card row: search + selects wrap and go full width */
+  @media (max-width: 900px) {
+    .card.card-pad .flex.gap-10 {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .card.card-pad .flex.gap-10 > * {
+      width: 100% !important;
+    }
+    .card.card-pad .flex.gap-10 .search-box {
+      width: 100% !important;
+    }
+    .card.card-pad .flex.gap-10 select {
+      width: 100% !important;
+    }
+  }
+
+  /* Table: always allow horizontal scroll, don't squash columns */
+  #inv-table {
+    min-width: 760px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tighter cells on small screens */
+  @media (max-width: 720px) {
+    #inv-table th,
+    #inv-table td {
+      padding: 9px 10px !important;
+      font-size: 12px !important;
+      white-space: nowrap;
+    }
+    #inv-table .cell-primary { font-size: 12.5px; }
+    #inv-table .cell-sub { font-size: 11px; }
+    #inv-table .tag { font-size: 10px; padding: 2px 7px; }
+    #inv-table .badge { font-size: 10.5px; padding: 3px 8px; }
+  }
+
+  /* Modals: fit on small screens */
+  @media (max-width: 520px) {
+    #register-modal > .card,
+    #edit-baseline-modal > .card {
+      width: 92vw !important;
+      max-width: 460px !important;
+      margin-top: 4vh !important;
+    }
+  }
+
+  /* Footer of table */
+  @media (max-width: 720px) {
+    .card > .flex[style*="border-top"] {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span></a></div><div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item active" href="inventory.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span></a></div><div class="nav-section"><div class="nav-label">DB OPERATIONS</div><a class="nav-item" href="operations.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span></a><a class="nav-item" href="upgrade.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span></a><a class="nav-item" href="failover-failback.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span></a></div><div class="nav-section"><div class="nav-label">MONITORING</div><a class="nav-item" href="monitoring.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring & Performance</span></a></div><div class="nav-section"><div class="nav-label">ALERTS</div><a class="nav-item" href="alerts.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span><span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span></a></div><div class="nav-section"><div class="nav-label">AUDIT</div><a class="nav-item" href="governance.html"><span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span></a></div>
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span class="">Infrastructure</span><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span><span class="current">MongoDB Servers</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+    <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">MongoDB Servers</h1>
+    <p class="page-sub" id="inv-subtitle">Loading registered servers&hellip;</p>
+  </div>
+  <div class="flex gap-8">
+    <button id="btn-manage-baselines" class="btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.31.22.65.22 1H21a2 2 0 010 4h-.09c-.14.31-.22.65-.22 1z"/></svg> Manage baselines</button>
+    <button id="register-server-btn" class="btn btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg> Register server</button>
+  </div>
+</div>
+
+<div class="card card-pad" style="margin-bottom:16px;">
+  <div class="flex gap-10" style="flex-wrap:wrap;">
+    <div class="search-box" style="width:260px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="inv-search" placeholder="Search hostname or IP" style="border:none;background:none;outline:none;width:100%;font-size:13px;"></div>
+    <select id="filter-env" class="field-select" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All environments</option>
+      <option value="prod">Production (prod)</option>
+      <option value="nonprod">Non-production (nonprod)</option>
+      <option value="staging">Staging</option>
+      <option value="uat">UAT</option>
+      <option value="dev">Dev</option>
+    </select>
+    <select id="filter-health" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All health</option>
+      <option value="OK">Healthy</option>
+      <option value="WARN">Warning</option>
+      <option value="CRITICAL">Critical</option>
+      <option value="UNKNOWN">Unknown</option>
+    </select>
+    <select id="filter-priority" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All priority</option>
+      <option value="P1">P1 / Critical</option>
+      <option value="P2">P2 / High</option>
+      <option value="P3">P3 / Medium</option>
+      <option value="P4">P4 / Low</option>
+    </select>
+    <select id="filter-cluster" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:13px;">
+      <option value="">All clusters</option>
+    </select>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data" id="inv-table">
+      <thead><tr><th>Server</th><th>Environment / Cluster</th><th>Role</th><th>Health</th><th>Replication</th><th>Backup</th><th>Priority</th></tr></thead>
+      <tbody id="inv-tbody">
+        <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted);">Loading servers&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex" style="justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border);">
+    <span class="cell-sub" id="inv-count">&nbsp;</span>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- PROFESSIONAL EDIT BASELINE & DELETE MODAL  -->
+<!-- ========================================== -->
+<div id="edit-baseline-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+  <div class="card" style="width: 460px; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; margin-top: -10vh;">
+    <div style="padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-dark);">Edit Server Baseline</h3>
+      <button id="close-edit-modal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+    </div>
+    
+    <div style="padding: 24px; display: flex; flex-direction: column; gap: 18px; background: #fff;">
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Server</label>
+        <select id="edit-server-select" class="field-select" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;"></select>
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Environment</label>
+        <input id="edit-server-env" type="text" placeholder="e.g. nonprod, prod" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Cluster Name</label>
+        <input id="edit-server-cluster" type="text" placeholder="e.g. standalone, cluster-a" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Priority</label>
+        <select id="edit-server-priority" class="field-select" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+          <option value="P1">P1 (Critical)</option>
+          <option value="P2">P2 (High)</option>
+          <option value="P3">P3 (Medium)</option>
+          <option value="P4">P4 (Low)</option>
+        </select>
+      </div>
+    </div>
+    
+    <div style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-page);">
+      <button id="delete-edit-modal" class="btn" style="background: var(--red-bg); border: 1px solid var(--red); color: var(--red); padding: 8px 16px;">Delete Server</button>
+      <div style="display: flex; gap: 12px;">
+        <button id="cancel-edit-modal" class="btn" style="background: #fff; border: 1px solid var(--border-strong); padding: 8px 16px;">Cancel</button>
+        <button id="submit-edit-modal" class="btn btn-primary" style="padding: 8px 24px; font-weight: 500;">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ========================================== -->
+
+
+<!-- ========================================== -->
+<!-- PROFESSIONAL REGISTER MODAL                -->
+<!-- ========================================== -->
+<div id="register-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+  <div class="card" style="width: 460px; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; margin-top: -10vh;">
+    <div style="padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-dark);">Register New Server</h3>
+      <button id="close-reg-modal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+    </div>
+    
+    <div style="padding: 24px; display: flex; flex-direction: column; gap: 18px; background: #fff;">
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Hostname <span style="color:var(--red);">*</span></label>
+        <input id="reg-hostname" type="text" placeholder="e.g. mongo-prod-05" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">IP Address <span style="color:var(--red);">*</span></label>
+        <input id="reg-ip" type="text" placeholder="e.g. 192.168.45.144" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">Environment</label>
+        <select id="reg-env" class="field-select" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+          <option value="prod">Production (prod)</option>
+          <option value="nonprod">Non-production (nonprod)</option>
+          <option value="staging">Staging</option>
+          <option value="uat">UAT</option>
+          <option value="dev">Dev</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: var(--text-dark);">MongoDB Port</label>
+        <input id="reg-port" type="number" value="27017" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; outline: none;">
+      </div>
+    </div>
+    
+    <div style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-page);">
+      <button id="cancel-reg-modal" class="btn" style="background: #fff; border: 1px solid var(--border-strong); padding: 8px 16px;">Cancel</button>
+      <button id="submit-reg-modal" class="btn btn-primary" style="padding: 8px 24px; font-weight: 500;">Register</button>
+    </div>
+  </div>
+</div>
+<!-- ========================================== -->
+
+
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script>
+let ALL_SERVERS = [];
+
+function healthBadge(status) {
+  const map = {
+    OK: '<span class="badge badge-green"><span class="dot"></span>Healthy</span>',
+    WARN: '<span class="badge badge-amber"><span class="dot"></span>Warning</span>',
+    CRITICAL: '<span class="badge badge-red"><span class="dot"></span>Critical</span>',
+  };
+  return map[status] || '<span class="badge badge-grey"><span class="dot"></span>Unknown</span>';
+}
+
+function renderRows(servers) {
+  const tbody = document.getElementById('inv-tbody');
+  if (!servers.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">
+      No matching servers found.</td></tr>`;
+    document.getElementById('inv-count').textContent = `Showing 0 of ${ALL_SERVERS.length} registered servers`;
+    return;
+  }
+  tbody.innerHTML = servers.map(s => `
+    <tr class="clickable" onclick="location.href='server-detail.html?id=${s.id}'">
+      <td><div class="cell-primary">${s.hostname}</div><div class="cell-sub">${s.ip_address}${s.mongo_version ? ' &middot; ' + s.mongo_version : ''}</div></td>
+      <td>${s.environment || '&mdash;'}<div class="cell-sub">${s.cluster_name || ''}</div></td>
+      <td><span class="tag">${s.node_role || 'UNKNOWN'}</span></td>
+      <td>${healthBadge(s.latest_status)}</td>
+      <td>${s.replica_set_name || '&mdash;'}</td>
+      <td>${s.backup_status || '&mdash;'}</td>
+      <td>${s.criticality || '&mdash;'}</td>
+    </tr>`).join('');
+  document.getElementById('inv-count').textContent = `Showing ${servers.length} of ${ALL_SERVERS.length} registered servers`;
+}
+
+function applyFilters() {
+  const q = document.getElementById('inv-search').value.trim().toLowerCase();
+  const env = document.getElementById('filter-env').value.trim().toLowerCase();
+  const health = document.getElementById('filter-health').value.trim();
+  const priority = document.getElementById('filter-priority').value.trim().toUpperCase();
+  const cluster = document.getElementById('filter-cluster').value.trim().toLowerCase();
+
+  const filtered = ALL_SERVERS.filter(s => {
+    const matchSearch = !q || (s.hostname && s.hostname.toLowerCase().includes(q)) || (s.ip_address && s.ip_address.toLowerCase().includes(q));
+    const sEnv = (s.environment || '').toLowerCase();
+    const matchEnv = !env || sEnv === env;
+    const sHealth = s.latest_status || 'UNKNOWN';
+    const matchHealth = !health || sHealth === health;
+    const sCrit = (s.criticality || '').toUpperCase();
+    const matchPriority = !priority || sCrit.includes(priority);
+    const sCluster = (s.cluster_name || '').toLowerCase();
+    const matchCluster = !cluster || sCluster === cluster;
+    return matchSearch && matchEnv && matchHealth && matchPriority && matchCluster;
+  });
+
+  renderRows(filtered);
+}
+
+function populateClusterDropdown(servers) {
+  const select = document.getElementById('filter-cluster');
+  const clusters = Array.from(new Set(servers.map(s => s.cluster_name).filter(Boolean)));
+  select.innerHTML = '<option value="">All clusters</option>' + 
+    clusters.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+async function loadServers() {
+  try {
+    const data = await Api.listServers();
+    ALL_SERVERS = data.servers;
+    document.getElementById('inv-subtitle').textContent =
+      `${data.count} registered server${data.count === 1 ? '' : 's'}`;
+    populateClusterDropdown(ALL_SERVERS);
+    renderRows(ALL_SERVERS);
+  } catch (err) {
+    document.getElementById('inv-subtitle').textContent = 'Could not load servers';
+    document.getElementById('inv-tbody').innerHTML =
+      `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--red);">Failed to load inventory: ${err.message}</td></tr>`;
+  }
+}
+
+// ----------------------------------------------------
+// EDIT & DELETE MODAL LOGIC
+// ----------------------------------------------------
+const editModal = document.getElementById('edit-baseline-modal');
+const selServer = document.getElementById('edit-server-select');
+const inpEnv = document.getElementById('edit-server-env');
+const inpCluster = document.getElementById('edit-server-cluster');
+const selPriority = document.getElementById('edit-server-priority');
+
+function fillModalData(serverId) {
+  const server = ALL_SERVERS.find(s => s.id == serverId);
+  if (server) {
+    inpEnv.value = server.environment || '';
+    inpCluster.value = server.cluster_name || '';
+    selPriority.value = server.criticality || 'P4';
+  }
+}
+
+document.getElementById('btn-manage-baselines').addEventListener('click', () => {
+  if (ALL_SERVERS.length === 0) {
+    alert("No servers registered to edit.");
+    return;
+  }
+  selServer.innerHTML = ALL_SERVERS.map(s => `<option value="${s.id}">${s.hostname} (${s.ip_address})</option>`).join('');
+  fillModalData(ALL_SERVERS[0].id);
+  editModal.style.display = 'flex';
+});
+
+selServer.addEventListener('change', (e) => {
+  fillModalData(e.target.value);
+});
+
+const closeEditModal = () => editModal.style.display = 'none';
+document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
+document.getElementById('cancel-edit-modal').addEventListener('click', closeEditModal);
+
+// Submit Edit
+document.getElementById('submit-edit-modal').addEventListener('click', async () => {
+  const btn = document.getElementById('submit-edit-modal');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(`/api/inventory/servers/${selServer.value}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        environment: inpEnv.value.trim(), 
+        cluster_name: inpCluster.value.trim(), 
+        criticality: selPriority.value 
+      })
+    });
+    
+    if (!response.ok) throw new Error('Failed to update backend.');
+    closeEditModal();
+    await loadServers();
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Submit';
+    btn.disabled = false;
+  }
+});
+
+// Delete Server
+document.getElementById('delete-edit-modal').addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to completely remove this server? This action cannot be undone.')) return;
+  
+  const btn = document.getElementById('delete-edit-modal');
+  btn.textContent = 'Deleting...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(`/api/inventory/servers/${selServer.value}`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Failed to delete server in backend.');
+    
+    closeEditModal();
+    await loadServers();
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+  } finally {
+    btn.textContent = 'Delete Server';
+    btn.disabled = false;
+  }
+});
+// ----------------------------------------------------
+
+
+// ----------------------------------------------------
+// REGISTER MODAL LOGIC
+// ----------------------------------------------------
+const regModal = document.getElementById('register-modal');
+
+document.getElementById('register-server-btn').addEventListener('click', () => {
+  document.getElementById('reg-hostname').value = '';
+  document.getElementById('reg-ip').value = '';
+  document.getElementById('reg-env').value = 'prod';
+  document.getElementById('reg-port').value = '27017';
+  regModal.style.display = 'flex';
+});
+
+const closeRegModal = () => regModal.style.display = 'none';
+document.getElementById('close-reg-modal').addEventListener('click', closeRegModal);
+document.getElementById('cancel-reg-modal').addEventListener('click', closeRegModal);
+
+document.getElementById('submit-reg-modal').addEventListener('click', async () => {
+  const hostname = document.getElementById('reg-hostname').value.trim();
+  const ip_address = document.getElementById('reg-ip').value.trim();
+  const environment = document.getElementById('reg-env').value;
+  const port = document.getElementById('reg-port').value || '27017';
+
+  if (!hostname || !ip_address) {
+    alert('Hostname and IP address are required fields!');
+    return;
+  }
+
+  const btn = document.getElementById('submit-reg-modal');
+  btn.textContent = 'Registering...';
+  btn.disabled = true;
+
+  try {
+    await Api.createServer({ hostname, ip_address, environment, port: Number(port) });
+    closeRegModal();
+    await loadServers();
+  } catch (err) {
+    alert('Could not register server: ' + err.message);
+  } finally {
+    btn.textContent = 'Register';
+    btn.disabled = false;
+  }
+});
+// ----------------------------------------------------
+
+
+// Event listeners for real-time filtering
+document.getElementById('inv-search').addEventListener('input', applyFilters);
+document.getElementById('filter-env').addEventListener('change', applyFilters);
+document.getElementById('filter-health').addEventListener('change', applyFilters);
+document.getElementById('filter-priority').addEventListener('change', applyFilters);
+document.getElementById('filter-cluster').addEventListener('change', applyFilters);
+
+loadServers();
+</script>
+
+</div>
+</div>
+</div>
+<script src="assets/app.js"></script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
+
+

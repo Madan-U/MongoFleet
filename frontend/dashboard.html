@@ -1,0 +1,367 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Dashboard
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Fleet health overview — aggregate metrics, status summary, and activity feed.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · MongoFleet</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text">
+      <span class="brand-name">MongoFleet</span>
+      <span class="brand-sub">DATABASE PLATFORM</span>
+    </div>
+  </div>
+
+  <nav class="nav-scroll">
+    <div class="nav-section">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item active" href="dashboard.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>Dashboard</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Infrastructure</div>
+      <a class="nav-item" href="inventory.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span>MongoDB Servers</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">DB Operations</div>
+      <a class="nav-item" href="operations.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Operations</span>
+      </a>
+      <a class="nav-item" href="upgrade.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg></span>Upgrades</span>
+      </a>
+      <a class="nav-item" href="failover-failback.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>Failover / Failback</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Monitoring</div>
+      <a class="nav-item" href="monitoring.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Monitoring &amp; Performance</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Alerts</div>
+      <a class="nav-item" href="alerts.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>Alerts</span>
+        <span class="nav-badge" id="nav-badge-alerts" style="display:none;"></span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Audit</div>
+      <a class="nav-item" href="governance.html">
+        <span class="lbl"><span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>Audit Logs</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-menu-wrap" style="position:relative;">
+  <button class="avatar" id="btn-user-menu" style="width:32px;height:32px;font-size:12px;border:none;cursor:pointer;">MU</button>
+  <div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+    <button class="user-dropdown-item" id="btn-logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </div>
+</div>
+    <div class="who"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="crumbs">
+        <span>Workspace</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+        <span class="current">Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="btn-support" title="Support">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+<div class="alert-bell-wrap" style="position:relative;">
+  <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <span class="dot-alert"></span>
+  </button>
+  <div class="alert-dropdown" id="alert-dropdown">
+    <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+    <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+  </div>
+</div>
+      <div class="user-menu-wrap" style="position:relative;">
+        <button class="avatar" id="btn-user-menu-top" style="border:none;cursor:pointer;">MU</button>
+        <div class="user-dropdown" id="user-dropdown-top">
+          <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+          <button class="user-dropdown-item" id="btn-logout-top">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub" id="dash-subtitle">Live status across your on-prem MongoDB estate</p>
+      </div>
+      <a class="btn btn-primary" href="inventory.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+        Register server
+      </a>
+    </div>
+
+    <div class="stat-grid" id="stat-grid">
+      <div class="card stat-card tint-navy">
+        <div class="stat-top">
+          <span class="stat-label">Total servers</span>
+          <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5M3 17l9 5 9-5"/></svg></span>
+        </div>
+        <div class="stat-value skeleton" id="stat-total-servers">000</div>
+        <div class="stat-foot" id="stat-total-servers-foot">&nbsp;</div>
+      </div>
+
+      <div class="card stat-card tint-green">
+        <div class="stat-top">
+          <span class="stat-label">System health</span>
+          <span class="stat-icon icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+        </div>
+        <div class="stat-value skeleton" id="stat-health">000</div>
+        <div class="stat-foot" id="stat-health-foot">&nbsp;</div>
+      </div>
+
+      <div class="card stat-card tint-navy">
+        <div class="stat-top">
+          <span class="stat-label">Running operations</span>
+          <span class="stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        </div>
+        <div class="stat-value skeleton" id="stat-running-ops">0</div>
+        <div class="stat-foot">Active right now</div>
+      </div>
+
+      <div class="card stat-card tint-red">
+        <div class="stat-top">
+          <span class="stat-label">Recent activity</span>
+          <span class="stat-icon icon-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+        </div>
+        <div class="stat-value skeleton" id="stat-audit-count">0</div>
+        <div class="stat-foot">Audit events, last 10</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Server inventory</h2>
+            <p class="panel-sub">Live status from your connected MongoDB servers</p>
+          </div>
+          <a class="link" href="inventory.html">View all servers
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr><th>Server</th><th>Role</th><th>Environment</th><th>Replication</th><th>Backup</th><th>Priority</th></tr>
+            </thead>
+            <tbody id="dash-inv-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink-400);">Loading&hellip;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Recent activity</h2>
+            <p class="panel-sub">Latest audited actions across the platform</p>
+          </div>
+        </div>
+        <div class="activity-list" id="dash-audit-list"><p class="cell-sub">Loading&hellip;</p></div>
+        <div style="padding:0 22px 18px;">
+          <a class="link" href="governance.html?tab=audit" style="justify-content:flex-end;width:100%;">View audit log
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <h2>Active operations</h2>
+        <p>Long-running infrastructure changes</p>
+      </div>
+      <a class="link" href="operations.html">Open operations
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <section class="panel">
+      <div class="ops-panel" id="dash-ops-card">
+        <div class="ops-empty">
+          <div class="ops-empty-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <h3 class="ops-empty-title">No active operations</h3>
+          <p class="ops-empty-text">The operation execution engine (restart / upgrade / failover workers) is not deployed on this environment yet — see the backend README's phase status. Once live, running operations will appear here with real progress.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+<script>
+function healthBadge(status) {
+  const map = {
+    OK: '<span class="badge badge-green"><span class="dot"></span>Healthy</span>',
+    WARN: '<span class="badge badge-amber"><span class="dot"></span>Warning</span>',
+    CRITICAL: '<span class="badge badge-red"><span class="dot"></span>Critical</span>',
+  };
+  return map[status] || '<span class="badge badge-grey"><span class="dot"></span>Unknown</span>';
+}
+
+function unSkeleton(el){ el.classList.remove('skeleton'); }
+
+async function loadDashboard() {
+  try {
+    const summary = await Api.dashboardSummary();
+
+    const totalEl = document.getElementById('stat-total-servers');
+    totalEl.textContent = summary.total_servers;
+    unSkeleton(totalEl);
+    document.getElementById('stat-total-servers-foot').textContent =
+      summary.total_servers === 0 ? 'No servers registered yet' : 'Registered in inventory';
+
+    const hc = summary.health_status_counts || {};
+    const healthyTotal = hc.OK || 0;
+    const healthEl = document.getElementById('stat-health');
+    healthEl.textContent = `${healthyTotal} / ${summary.total_servers}`;
+    unSkeleton(healthEl);
+    document.getElementById('stat-health-foot').textContent =
+      `${hc.OK || 0} healthy · ${hc.WARN || 0} warning · ${hc.CRITICAL || 0} critical · ${hc.UNKNOWN || 0} unknown`;
+
+    const opsEl = document.getElementById('stat-running-ops');
+    opsEl.textContent = summary.running_operations;
+    unSkeleton(opsEl);
+
+    const auditCountEl = document.getElementById('stat-audit-count');
+    auditCountEl.textContent = summary.recent_audit.length;
+    unSkeleton(auditCountEl);
+
+    const auditList = document.getElementById('dash-audit-list');
+    auditList.innerHTML = summary.recent_audit.length
+      ? summary.recent_audit.map(a => `
+          <div class="alert-item">
+            <div class="dot-mark"></div>
+            <div style="flex:1;min-width:0;">
+              <p class="alert-title">${a.action}</p>
+              <p class="alert-desc">${a.actor || 'system'} &middot; ${new Date(a.ts).toLocaleString()}</p>
+            </div>
+          </div>`).join('')
+      : '<p class="cell-sub" style="padding:0 22px;">No audit activity yet.</p>';
+  } catch (err) {
+    document.getElementById('dash-subtitle').textContent = 'Could not load dashboard data';
+  }
+
+  try {
+    const inv = await Api.listServers();
+    const tbody = document.getElementById('dash-inv-tbody');
+    const preview = inv.servers.slice(0, 6);
+    tbody.innerHTML = preview.length
+      ? preview.map(s => `
+          <tr class="clickable" onclick="location.href='server-detail.html?id=${s.id}'">
+            <td><div class="cell-primary">${s.hostname}</div><div class="cell-sub">${s.ip_address}${s.mongo_version ? ' &middot; ' + s.mongo_version : ''}</div></td>
+            <td><span class="tag">${s.node_role || 'UNKNOWN'}</span></td>
+            <td>${s.environment || '&mdash;'}</td>
+            <td>${s.replica_set_name || '&mdash;'}</td>
+            <td>${healthBadge(s.latest_status)}</td>
+            <td>${s.criticality || '&mdash;'}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-400);">No servers registered yet — <a class="link" style="display:inline" href="inventory.html">register one</a>.</td></tr>`;
+  } catch (err) {
+    document.getElementById('dash-inv-tbody').innerHTML =
+      `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Failed to load inventory: ${err.message}</td></tr>`;
+  }
+}
+
+loadDashboard();
+</script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
+
+

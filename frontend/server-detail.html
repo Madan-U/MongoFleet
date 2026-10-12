@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  Page        : Server Detail
+  Application : MongoFleet — MongoDB DBA Platform
+  Author      : Madan U
+  Email       : madanu135@gmail.com
+  Description : Live metrics and static inventory for a single MongoDB server host.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title-tag">Server Details · MongoFleet</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">MF</div>
+    <div class="brand-text"><span class="brand-name">MongoFleet</span><span class="brand-sub">DATABASE PLATFORM</span></div>
+  </div>
+  <div class="nav-section"><div class="nav-label">WORKSPACE</div><a class="nav-item" href="dashboard.html"><span class="lbl">Dashboard</span></a></div>
+  <div class="nav-section"><div class="nav-label">INFRASTRUCTURE</div><a class="nav-item active" href="inventory.html"><span class="lbl">MongoDB Servers</span></a></div>
+</aside>
+
+<div class="main">
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="icon-btn menu-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  <div class="crumbs"><span><a href="inventory.html">MongoDB Servers</a></span><span>&rsaquo;</span><span class="current" id="crumb-hostname">Loading&hellip;</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="btn-support" title="Support">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <div class="alert-bell-wrap" style="position:relative;">
+      <button class="icon-btn" id="btn-alert-bell" title="Alerts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="dot-alert"></span>
+      </button>
+      <div class="alert-dropdown" id="alert-dropdown">
+        <div class="alert-dropdown-head"><strong>Recent alerts</strong><a href="alerts.html" class="link" style="font-size:12px;">View all</a></div>
+        <div class="alert-dropdown-list" id="alert-dropdown-list"><p class="cell-sub" style="padding:14px;">Loading&hellip;</p></div>
+      </div>
+    </div>
+    <div class="user-menu-wrap" style="position:relative;">
+      <button class="avatar" id="btn-user-menu-top" style="border:none;cursor:pointer;">MU</button>
+      <div class="user-dropdown" id="user-dropdown-top">
+        <div class="user-dropdown-head"><strong>Madan U</strong><span>DBA &middot; MongoFleet</span></div>
+        <button class="user-dropdown-item" id="btn-logout-top">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="page-head">
+  <div>
+    <div class="flex gap-10" style="margin-bottom:6px; flex-wrap: wrap;">
+      <h1 class="page-title" id="head-hostname" style="margin:0;">Loading&hellip;</h1>
+      <span class="badge badge-grey" id="badge-health"><span class="dot"></span>Checking&hellip;</span>
+      <span class="tag" id="badge-role">UNKNOWN</span>
+    </div>
+    <p class="page-sub" id="head-sub">&nbsp;</p>
+  </div>
+  <div class="flex gap-8">
+    <button class="btn" id="btn-edit-static"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit ownership details</button>
+    <button class="btn" id="btn-refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Refresh live metrics</button>
+  </div>
+</div>
+
+<div class="tabs" data-group="server">
+  <div class="tab active" data-target="t-overview" data-key="overview">Live Metrics &amp; Inventory</div>
+</div>
+
+<div class="tab-panel active" data-group="server" id="t-overview">
+
+  <!-- LIVE metrics: pulled fresh over SSH/Mongo on every load — never stored -->
+  <div class="metrics-grid">
+    <div class="metric-card"><div class="metric-title">CPU Usage</div><div class="metric-val" id="m-cpu">&hellip;</div></div>
+    <div class="metric-card"><div class="metric-title">Memory Usage</div><div class="metric-val" id="m-mem">&hellip;</div></div>
+    <div class="metric-card"><div class="metric-title">Database Uptime</div><div class="metric-val" id="m-dbup">&hellip;</div></div>
+    <div class="metric-card"><div class="metric-title">Replication Lag</div><div class="metric-val" id="m-lag">&hellip;</div></div>
+    <div class="metric-card"><div class="metric-title">Active Connections</div><div class="metric-val" id="m-conn">&hellip;</div></div>
+    <div class="metric-card"><div class="metric-title">OS Uptime</div><div class="metric-val" id="m-osup">&hellip;</div></div>
+  </div>
+  <p class="stale-note" id="live-checked-at">&nbsp;</p>
+
+  <div class="inventory-grid" style="margin-top:20px;">
+
+    <!-- STATIC inventory: read from Postgres, written only by the hourly cron -->
+    <div class="card card-pad">
+      <div class="section-head" style="margin-top:0;"><div><h2>Infrastructure &amp; OS Specifications</h2>
+        <div class="sync-info">
+          <span class="sync-chip pending" id="sync-last" title="">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <span id="sync-last-text">Last collection: &hellip;</span>
+          </span>
+          <span class="sync-chip pending" id="sync-next" title="">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3.5-7.14M21 4v5h-5"/></svg>
+            <span id="sync-next-text">Next sync: &hellip;</span>
+          </span>
+        </div>
+      </div></div>
+      <div class="table-responsive">
+        <table class="data"><tbody>
+          <tr><td class="cell-sub">Server Hostname</td><td id="inv-hostname" class="mono">&mdash;</td></tr>
+          <tr><td class="cell-sub">FQDN</td><td id="inv-fqdn" class="mono">&mdash;</td></tr>
+          <tr><td class="cell-sub">IP Address</td><td id="inv-ip" class="mono">&mdash;</td></tr>
+          <tr><td class="cell-sub">OS</td><td id="inv-os">&mdash;</td></tr>
+          <tr><td class="cell-sub">CPU Cores</td><td id="inv-cpu">&mdash;</td></tr>
+          <tr><td class="cell-sub">Total Memory</td><td id="inv-memory">&mdash;</td></tr>
+          <tr><td class="cell-sub">Total Disk (/)</td><td id="inv-disktotal">&mdash;</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="section-head" style="margin-top:0;"><div><h2>Database &amp; Application Ownership</h2></div></div>
+      <div class="table-responsive">
+        <table class="data"><tbody>
+          <tr><td class="cell-sub">Database Type</td><td>MongoDB</td></tr>
+          <tr><td class="cell-sub">DB Version</td><td id="inv-version" class="mono">&mdash;</td></tr>
+          <tr><td class="cell-sub">Edition</td><td id="inv-edition">&mdash;</td></tr>
+          <tr><td class="cell-sub">Server Owner</td><td id="inv-server-owner">&mdash;</td></tr>
+          <tr><td class="cell-sub">Application Name</td><td id="inv-app-name">&mdash;</td></tr>
+          <tr><td class="cell-sub">Role</td><td><span class="tag" id="inv-role">UNKNOWN</span></td></tr>
+          <tr><td class="cell-sub">Replica Set Name</td><td id="inv-rs" class="mono">&mdash;</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit ownership/edition -- the 3 static fields that are never auto-collected
+     (owner & application name are business metadata, edition can't always be
+     reliably detected). Everything else on this page stays read-only, either
+     live-pulled or written only by the hourly static-inventory cron. -->
+<div class="modal-overlay" id="edit-static-modal">
+  <div class="modal">
+    <div class="modal-head"><h3>Edit ownership details</h3><button class="icon-btn" id="close-edit-static">&times;</button></div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label">Server Owner</label>
+        <input id="es-owner" class="field-input" style="width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:6px;font-size:13px;" placeholder="e.g. DBA Team / jane.doe@corp">
+      </div>
+      <div class="field-group" style="margin-top:14px;">
+        <label class="field-label">Application Name</label>
+        <input id="es-app-name" class="field-input" style="width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:6px;font-size:13px;" placeholder="e.g. Payments Service">
+      </div>
+      <div class="field-group" style="margin-top:14px;">
+        <label class="field-label">Edition</label>
+        <select id="es-edition" class="field-select" style="width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:6px;font-size:13px;">
+          <option value="">Unknown / not set</option>
+          <option value="Community">Community</option>
+          <option value="Enterprise">Enterprise</option>
+          <option value="Atlas">Atlas</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="cancel-edit-static">Cancel</button>
+      <button class="btn btn-primary" id="submit-edit-static">Save</button>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="m-support">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head"><h3>Contact DBA support</h3><button class="icon-btn" onclick="closeModal('m-support')">&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:14px;">Describe the issue and it will be sent to the DBA team.</p>
+      <div class="field"><label>Your name</label><input type="text" id="s-username" placeholder="e.g. Madan U"></div>
+      <div class="field"><label>Your email</label><input type="email" id="s-email" placeholder="support@atlascontrol.io"></div>
+      <div class="field"><label>Issue</label><textarea id="s-issue" rows="5" placeholder="Describe what went wrong…" style="width:100%;padding:10px;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;"></textarea></div>
+      <p class="hint" id="s-error" style="color:var(--red); display:none;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-support')">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-support">Send to DBA team</button>
+    </div>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script src="assets/app.js"></script>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const serverId = urlParams.get('id');
+
+// Static-inventory cron runs every 5 minutes (backend/scripts/collect_static_inventory.py
+// via run_static_inventory_collect.sh on cron). Keep this in sync with the crontab entry.
+const STATIC_SYNC_INTERVAL_MIN = 5;
+
+function setVal(id, value, unavailableText) {
+  const el = document.getElementById(id);
+  if (value === null || value === undefined || value === '') {
+    el.textContent = unavailableText || 'Unavailable';
+    el.classList.add('unavailable');
+  } else {
+    el.textContent = value;
+    el.classList.remove('unavailable');
+  }
+}
+
+function timeAgo(iso) {
+  if (!iso) return null;
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  return `${(mins / 60).toFixed(1)} hr ago`;
+}
+
+// For a future timestamp (next sync). Negative diff = the job is overdue —
+// still shown honestly rather than hidden, since that itself is useful signal.
+function timeUntil(iso) {
+  if (!iso) return null;
+  const diffMs = new Date(iso).getTime() - Date.now();
+  const mins = Math.round(diffMs / 60000);
+  if (mins <= 0) return { text: mins === 0 ? 'due now' : `overdue by ${Math.abs(mins)} min`, overdue: true };
+  if (mins < 60) return { text: `in ${mins} min`, overdue: false };
+  return { text: `in ${(mins / 60).toFixed(1)} hr`, overdue: false };
+}
+
+function formatUptime(seconds) {
+  if (seconds === null || seconds === undefined) return null;
+  const hrs = seconds / 3600;
+  if (hrs < 48) return `${hrs.toFixed(1)} hrs`;
+  const days = Math.floor(hrs / 24);
+  const remHrs = Math.round(hrs % 24);
+  return `${days}d ${remHrs}h`;
+}
+
+let CURRENT_SERVER = null;
+
+async function loadStaticInventory() {
+  try {
+    const server = await Api.getServer(serverId);
+    CURRENT_SERVER = server;
+
+    document.getElementById('page-title-tag').textContent = `${server.hostname} · MongoFleet`;
+    document.getElementById('crumb-hostname').textContent = server.hostname;
+    document.getElementById('head-hostname').textContent = server.hostname;
+    document.getElementById('head-sub').textContent = `${server.ip_address} · ${server.environment || 'environment not set'}`;
+
+    setVal('inv-hostname', server.hostname);
+    setVal('inv-fqdn', server.fqdn);
+    setVal('inv-ip', server.ip_address);
+    setVal('inv-os', server.os_version);
+    setVal('inv-cpu', server.cpu_cores ? `${server.cpu_cores} cores` : null);
+    setVal('inv-memory', server.memory_gb ? `${server.memory_gb} GB` : null);
+    setVal('inv-disktotal', server.disk_gb ? `${server.disk_gb} GB` : null);
+    setVal('inv-version', server.mongo_version);
+    setVal('inv-edition', server.mongo_edition);
+    setVal('inv-server-owner', server.owner);
+    setVal('inv-app-name', server.application_name);
+    setVal('inv-rs', server.replica_set_name);
+
+    document.getElementById('inv-role').textContent = server.node_role || 'UNKNOWN';
+    document.getElementById('badge-role').textContent = server.node_role || 'UNKNOWN';
+
+    const lastChip = document.getElementById('sync-last');
+    const nextChip = document.getElementById('sync-next');
+    const lastText = document.getElementById('sync-last-text');
+    const nextText = document.getElementById('sync-next-text');
+
+    if (server.static_collected_at) {
+      const lastDate = new Date(server.static_collected_at);
+      const nextDate = new Date(lastDate.getTime() + STATIC_SYNC_INTERVAL_MIN * 60000);
+
+      lastChip.classList.remove('pending');
+      lastChip.title = lastDate.toLocaleString();
+      lastText.textContent = `Last collection: ${timeAgo(server.static_collected_at)}`
+        + (server.static_collection_error ? ' (partial)' : '');
+      if (server.static_collection_error) lastChip.title += ` — partial: ${server.static_collection_error}`;
+
+      const next = timeUntil(nextDate.toISOString());
+      nextChip.classList.remove('pending');
+      nextChip.classList.toggle('overdue', next.overdue);
+      nextChip.title = nextDate.toLocaleString();
+      nextText.textContent = `Next sync: ${next.text}`;
+    } else {
+      lastText.textContent = 'Last collection: not yet collected';
+      nextText.textContent = 'Next sync: pending first run';
+      lastChip.title = '';
+      nextChip.title = '';
+    }
+  } catch (err) {
+    document.getElementById('head-hostname').textContent = 'Error loading server';
+    document.getElementById('head-sub').textContent = err.message;
+  }
+}
+
+async function loadLiveMetrics() {
+  const btn = document.getElementById('btn-refresh');
+  btn.disabled = true;
+  try {
+    const data = await Api.getLiveMetrics(serverId);
+
+    setVal('m-cpu', data.os.cpu_pct !== null ? `${data.os.cpu_pct}%` : null, data.os.error ? 'SSH unreachable' : 'Unavailable');
+    setVal('m-mem', data.os.memory_pct !== null ? `${data.os.memory_pct}%` : null, data.os.error ? 'SSH unreachable' : 'Unavailable');
+    setVal('m-osup', data.os.uptime_seconds !== null ? `${(data.os.uptime_seconds / 3600).toFixed(1)} hrs` : null, 'Unavailable');
+
+    if (data.mongo.reachable) {
+      if (data.mongo.replica_state === 'STANDALONE' || data.mongo.replication_lag_seconds === null) {
+        setVal('m-lag', data.mongo.replica_state === 'STANDALONE' ? 'N/A (standalone)' : null);
+      } else {
+        setVal('m-lag', `${data.mongo.replication_lag_seconds}s`);
+      }
+      setVal('m-conn', data.mongo.connections_current);
+      setVal('m-dbup', formatUptime(data.mongo.uptime_seconds), 'Unavailable');
+    } else {
+      setVal('m-lag', null, 'Mongo unreachable');
+      setVal('m-conn', null, 'Mongo unreachable');
+      setVal('m-dbup', null, 'Mongo unreachable');
+    }
+
+    const badge = document.getElementById('badge-health');
+    if (data.status === 'OK') {
+      badge.innerHTML = '<span class="dot"></span>Healthy';
+      badge.className = 'badge badge-green';
+    } else {
+      badge.innerHTML = '<span class="dot"></span>Critical';
+      badge.className = 'badge badge-red';
+    }
+
+    document.getElementById('live-checked-at').textContent =
+      `Live metrics as of ${new Date(data.checked_at).toLocaleTimeString()}`
+      + (data.os.error ? ` — SSH error: ${data.os.error}` : '')
+      + (data.mongo.error ? ` — Mongo error: ${data.mongo.error}` : '');
+  } catch (err) {
+    document.getElementById('live-checked-at').textContent = `Failed to load live metrics: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+if (!serverId) {
+  document.getElementById('head-hostname').textContent = 'No server selected';
+  document.getElementById('head-sub').textContent = 'Open this page from the inventory list.';
+} else {
+  loadStaticInventory();
+  loadLiveMetrics();
+  document.getElementById('btn-refresh').addEventListener('click', loadLiveMetrics);
+}
+
+// ----------------------------------------------------
+// EDIT OWNERSHIP DETAILS (owner / application name / edition only --
+// everything else on this page is either live-pulled or cron-written)
+// ----------------------------------------------------
+const editStaticModal = document.getElementById('edit-static-modal');
+
+document.getElementById('btn-edit-static').addEventListener('click', () => {
+  if (!CURRENT_SERVER) return;
+  document.getElementById('es-owner').value = CURRENT_SERVER.owner || '';
+  document.getElementById('es-app-name').value = CURRENT_SERVER.application_name || '';
+  document.getElementById('es-edition').value = CURRENT_SERVER.mongo_edition || '';
+  editStaticModal.style.display = 'flex';
+});
+
+const closeEditStatic = () => editStaticModal.style.display = 'none';
+document.getElementById('close-edit-static').addEventListener('click', closeEditStatic);
+document.getElementById('cancel-edit-static').addEventListener('click', closeEditStatic);
+
+document.getElementById('submit-edit-static').addEventListener('click', async () => {
+  const btn = document.getElementById('submit-edit-static');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  try {
+    const response = await fetch(`/api/inventory/servers/${serverId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        owner: document.getElementById('es-owner').value.trim(),
+        application_name: document.getElementById('es-app-name').value.trim(),
+        mongo_edition: document.getElementById('es-edition').value,
+      }),
+    });
+    if (!response.ok) throw new Error('Failed to update backend.');
+    closeEditStatic();
+    await loadStaticInventory();
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Save';
+    btn.disabled = false;
+  }
+});
+
+</script>
+
+<script>
+document.getElementById('btn-user-menu-top')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('user-dropdown-top').classList.toggle('open');
+});
+document.getElementById('btn-logout-top')?.addEventListener('click', async function() {
+  try { await Api.logout(); } finally { location.href = 'login.html'; }
+});
+document.addEventListener('click', function() {
+  document.getElementById('user-dropdown-top')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
+
+
+
